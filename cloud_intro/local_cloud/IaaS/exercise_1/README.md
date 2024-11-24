@@ -27,7 +27,7 @@ Now that the server is created, we will create a simple website
     </head>
     <body>
         <h1>Hello, World!</h1>
-        <p>This is a basic webpage served by Nginx on your VM.</p>
+        <p>This is a basic webpage served by Nginx on your VM</p>
     </body>
     </html>
     ````
