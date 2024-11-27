@@ -21,17 +21,17 @@ try:
     cursor = connection.cursor()
 
     cursor.execute("""
-        CREATE TABLE students (
+        CREATE TABLE cloud_providers (
             id SERIAL PRIMARY KEY,
             name VARCHAR(100),
-            email VARCHAR(100)
+            year_created INTEGER
         );
     """)
-    print("Table 'students' created successfully.")
+    print("Table 'cloud_providers' created successfully.")
 
     cursor.execute("""
-        INSERT INTO students (name, email)
-        VALUES ('Alice', 'alice@example.com'), ('Bob', 'bob@example.com');
+        INSERT INTO cloud_providers (name, year_created)
+        VALUES ('AWS', 2002), ('GCP', 2008), ('AZURE', 2010);
     """)
     connection.commit()
     print("Data inserted successfully.")
