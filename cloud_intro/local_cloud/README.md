@@ -23,11 +23,7 @@ For the first part of this module, we will simulate cloud computing concepts (Ia
    - Use **Docker** to containerize a simple Flask application
    - Build and deploy containers locally to simulate application hosting.
 
-### 3. **Simulating SaaS (Software as a Service):**
-   - Deploy and use a locally hosted web application.
-   - Manage app users and permissions to demonstrate SaaS usability.
-
-### 4. **Implementing Security and IAM (Identity and Access Management):**
+### 3. **Implementing Security and IAM (Identity and Access Management):**
    - Configure local users and roles on the Ubuntu server.
    - Simulate network security with firewall rules using `iptables`.
    - Demonstrate SSH configuration and secure access best practices.
