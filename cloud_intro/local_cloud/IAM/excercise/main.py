@@ -32,7 +32,7 @@ class ValenciaHousePrice():
                 f"precio-de-compra-en-idealista/records?limit={number_of_results}"
             )
             response = requests.get(url)
-            logger.info("Getting response from Valencia Open Data")
+            logging.info("Getting response from Valencia Open Data")
             data = response.json()
             if data.get("error_code"):
                 raise ValueError(f"Error in url: {data['message']}")
@@ -41,7 +41,7 @@ class ValenciaHousePrice():
         return response.json()
 
     def parse_data(self, data):
-        logger.info(f"Starting parsing of data for area(s): {self.area_name}")
+        logging.info(f"Starting parsing of data for area(s): {self.area_name}")
         for raw_data in data["results"]:
             information_dict = {}
             information_dict["barrio"] = raw_data["barrio"]
@@ -56,16 +56,16 @@ class ValenciaHousePrice():
                 self.parse_data_list.append(information_dict)
             elif self.area_name == information_dict["barrio"]:
                 self.parse_data_list.append(information_dict)
-                logger.info("Parsing completed")
+                logging.info("Parsing completed")
                 return self.parse_data_list
-        logger.info("Parsing completed")
+        logging.info("Parsing completed")
         return self.parse_data_list
 
     def write_parse_data_list(self, area_name):
-        logger.info("Starting writting of results...")
+        logging.info("Starting writting of results...")
         file_path = "./results/"
         if not os.path.exists(file_path):
-            logger.info(f"Creating path {file_path}")
+            logging.info(f"Creating path {file_path}")
             os.makedirs(file_path)
         file = file_path + f"{area_name}.csv"
         with open(file, 'w') as f:
@@ -74,7 +74,7 @@ class ValenciaHousePrice():
             writer.writerow(csv_header)
             for area in self.parse_data_list:
                 writer.writerow(area.values())
-            logger.info("Finish writting")
+            logging.info("Finish writting")
 
 
 if __name__ == "__main__":
