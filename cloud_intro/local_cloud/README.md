@@ -25,8 +25,8 @@ For the first part of this module, we will simulate cloud computing concepts (Ia
 
 ### 3. **Implementing Security and IAM (Identity and Access Management):**
    - Configure local users and roles on the Ubuntu server.
-   - Simulate network security with firewall rules using `iptables`.
-   - Demonstrate SSH configuration and secure access best practices.
+   - Create some data using a data_eng role with higher permissions
+   - Download data with a data_analyst role with lower permissions
 
 ## References
 - [VirtualBox Documentation](https://www.virtualbox.org/manual/)

@@ -1,25 +1,36 @@
+import logging
+import os
+
 import psycopg2
 
-# Connection details
-POSTGRES_HOST = "<DB_IP_ADDRESS>"
-POSTGRES_PORT = "5432"
-POSTGRES_USER = "<edem-username>"
-POSTGRES_PASSWORD = "<your-password>"
-POSTGRES_DB = "<edem-username>_db"
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger()
 
-try:
-    # Connect to the PostgreSQL database
-    connection = psycopg2.connect(
-        dbname=POSTGRES_DB,
-        user=POSTGRES_USER,
-        password=POSTGRES_PASSWORD,
-        host=POSTGRES_HOST,
-        port=POSTGRES_PORT,
-    )
-    print("Connected to the database!")
 
-    cursor = connection.cursor()
+def create_connection(POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD,
+                     POSTGRES_HOST, POSTGRES_PORT):
+    try:
+        connection = psycopg2.connect(
+            dbname=POSTGRES_DB,
+            user=POSTGRES_USER,
+            password=POSTGRES_PASSWORD,
+            host=POSTGRES_HOST,
+            port=POSTGRES_PORT,
+        )
+        logging.info("Connected to the database!")
+        cursor = connection.cursor()
+        return connection, cursor
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
 
+
+def create_table(connection, cursor):
     cursor.execute("""
         CREATE TABLE cloud_providers (
             id SERIAL PRIMARY KEY,
@@ -27,23 +38,41 @@ try:
             year_created INTEGER
         );
     """)
-    print("Table 'cloud_providers' created successfully.")
+    connection.commit()
+    logging.info("Table 'cloud_providers' created successfully.")
 
+
+def insert_values(connection, cursor):
     cursor.execute("""
         INSERT INTO cloud_providers (name, year_created)
         VALUES ('AWS', 2002), ('GCP', 2008), ('AZURE', 2010);
     """)
     connection.commit()
-    print("Data inserted successfully.")
+    logging.info("Data inserted successfully.")
 
-    cursor.execute("SELECT * FROM students;")
+
+def query_table(cursor):
+    cursor.execute("SELECT * FROM cloud_providers;")
     rows = cursor.fetchall()
-    for row in rows:
-        print(row)
+    return rows
 
+def close_connection(connection, cursor):
     cursor.close()
     connection.close()
-    print("Connection closed.")
+    logging.info("Connection closed.")
 
-except Exception as e:
-    print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    # Connection details
+    POSTGRES_HOST = "192.168.0.47"
+    POSTGRES_PORT = "5432"
+    POSTGRES_USER = "mimove"
+    POSTGRES_PASSWORD = "edem2425"
+    POSTGRES_DB = "mimove_db"
+    connection, cursor = create_connection(POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD,
+                                          POSTGRES_HOST, POSTGRES_PORT)
+    create_table(connection, cursor)
+    insert_values(connection, cursor)
+    table_rows = query_table(cursor)
+    for row in table_rows:
+        logging.info(row)
