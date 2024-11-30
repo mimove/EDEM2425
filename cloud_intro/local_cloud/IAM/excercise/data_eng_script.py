@@ -63,7 +63,7 @@ class ValenciaHousePrice():
 
     def write_parse_data_list(self, area_name):
         logging.info("Starting writting of results...")
-        file_path = "./results/"
+        file_path = "/project/"
         if not os.path.exists(file_path):
             logging.info(f"Creating path {file_path}")
             os.makedirs(file_path)
