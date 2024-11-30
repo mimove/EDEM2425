@@ -62,9 +62,11 @@ class ValenciaHousePrice():
         return self.parse_data_list
 
     def write_parse_data_list(self, area_name):
+        logger.info("Starting writting of results...")
         file_path = "./results/"
         if not os.path.exists(file_path):
-            os.makedirs(file_path)   
+            logger.info(f"Creating path {file_path}")
+            os.makedirs(file_path)
         file = file_path + f"{area_name}.csv"
         with open(file, 'w') as f:
             writer = csv.writer(f)
@@ -72,6 +74,7 @@ class ValenciaHousePrice():
             writer.writerow(csv_header)
             for area in self.parse_data_list:
                 writer.writerow(area.values())
+            logger.info("Finish writting")
 
 
 if __name__ == "__main__":
