@@ -14,6 +14,15 @@ The code is provided in two different folders
   - Inside this folder there are two services he has to deploy:
     - A Dockerfile with a postgres image
     - An app.py file with a Flask API for interacting with the Postgres deployed in the container
+    - Also the code has to be copied to the VM created at the begginning of the session, this can be done with the scp command:
+      ```sh
+      scp -r excercise_sql_owner <edem-user>@<edem-user>-vm:~/
+      ```
+     - Then log-in into the vm
+        ```sh
+        ssh <edem-user>@<edem-vm>
+        cd excercise_sql_owner
+        ```
 
 - **Student 2** has to open the code inside [excercise_sql_user](./excercise_sql_user/)
   - Inside this folder there are two scripts that will be used
@@ -27,7 +36,7 @@ To deploy both the postgres container, and the API, these steps have to be follo
 
 1. Create a python venv to install the require libraries locally for this excercise without affecting your global python
     ```sh
-    python -m venv .venv
+    python3 -m venv .venv
     source .venv/bin/activate
     ```
 

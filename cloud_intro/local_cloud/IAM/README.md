@@ -84,7 +84,7 @@ Once your classmate has created the two new roles, now you would be able to have
    python3 -m venv .venv
    source .venv/bin/activate
    pip install -r requirements.txt
-   python3 data_eng_script.py
+   python data_eng_script.py
    ```
    This will generate the `all_areas.csv` with the ETL perform to the API of Open Data Valencia
 
