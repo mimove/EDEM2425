@@ -1,2 +1,4 @@
 kafka-python==2.0.2
 requests==2.32.3
+psycopg2-binary==2.9.10
+clickhouse-driver==0.2.9
