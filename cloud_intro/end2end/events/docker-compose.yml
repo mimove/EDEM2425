@@ -1,5 +1,13 @@
 version: '2'
 services:
+
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+     - "2181:2181"
+    networks:
+      - events-manager
+
   kafka0:
     image: confluentinc/cp-kafka:latest
     depends_on:
