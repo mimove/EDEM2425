@@ -6,7 +6,7 @@ import sys
 from kafka import KafkaProducer, errors
 
 
-class Publisher:
+class EventsManager:
     def __init__(self, topic_name):
         self.payload = {}
         self.topic_name = topic_name
