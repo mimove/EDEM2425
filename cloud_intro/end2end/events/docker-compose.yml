@@ -63,6 +63,6 @@ services:
 
 networks:
   events-manager:
-    external: true
+    external: false
     name: events-manager
     driver: bridge
