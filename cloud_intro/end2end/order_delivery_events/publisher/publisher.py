@@ -1,5 +1,7 @@
 import logging
-from utils import Publisher
+import requests
+from utils.events_manager import EventsManager
+
 
 
 if __name__ == "__main__":
@@ -10,9 +12,8 @@ if __name__ == "__main__":
                             logging.StreamHandler()
                         ]
     )
-
     logger = logging.getLogger()
-    producer = Publisher('events-ecommerce-mimove')
+    producer = EventsManager('events-ecommerce-mimove')
     producer.create_producer()
     messages = [{'name': 'test1', 'id': 1}, {'name': 'test2', 'id': 2}]
     for message in messages:
