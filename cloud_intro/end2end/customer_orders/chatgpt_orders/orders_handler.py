@@ -5,6 +5,7 @@ from datetime import datetime
 # Base URL for Fake Store API
 BASE_URL = "https://fakestoreapi.com"
 
+
 def create_order(user, products_with_details, num_order_generated):
     """Create an order for a given user with random products."""
     selected_products = random.sample(products_with_details, random.randint(1, 3))  # Randomly select 1 to 3 products
@@ -74,5 +75,4 @@ def simulate_order_creation(num_order_generated):
 
 
 if __name__ == "__main__":
-    # Start the simulation
     payload = simulate_order_creation()
