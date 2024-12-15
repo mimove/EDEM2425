@@ -3,7 +3,6 @@ import requests
 from utils.events_manager import EventsManager
 
 
-
 if __name__ == "__main__":
     logging.basicConfig(
                         level=logging.INFO,

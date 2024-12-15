@@ -1,3 +1,5 @@
+import datetime
+import json
 import logging
 import os
 import random
@@ -6,7 +8,10 @@ import time
 
 import psycopg2
 
-from chatgpt_orders.orders_handler import get_limited_products, get_limited_users, create_order
+from chatgpt_orders.orders_handler import get_limited_products, get_limited_users,\
+                                          create_order
+from events_utils.events_manager import EventsManager
+
 
 def insert_data(order):
     try:
@@ -37,13 +42,15 @@ def insert_data(order):
                 (order_id, product['productId'], product['quantity'], product['price'])
             )
         conn.commit()
-        logging.info(f"Order {order['numOrderGenerated']} inserted successfully\n")
+        logging.info(f"Order {order_id} inserted successfully\n")
+        return order_id
     except Exception as e:
         logging.error(f"Error inserting data: {e}")
         sys.exit(1)
     finally:
         cursor.close()
         conn.close()
+
 
 if __name__ == "__main__":
     logging.basicConfig(
@@ -67,11 +74,16 @@ if __name__ == "__main__":
     users = get_limited_users(limit=10)
     if not products_with_details or not users:
         logging.info("No products or users available. Exiting.")
+        sys.exit(1)
+    producer = EventsManager('orders-confirmed')
+    producer.create_producer()
     while True:
         user = random.choice(users)
         logging.info(f"Creating new order for customer {user}\n")
         order = create_order(user, products_with_details, num_orders_generated)
         logging.info("Inserting new order in DataBase\n")
-        insert_data(order)
+        order_id = insert_data(order)
+        message = {'order_id': order_id, 'created_at': datetime.datetime.now().isoformat()}
+        producer.send_message(message)
         num_orders_generated += 1
         time.sleep(3)
