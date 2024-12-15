@@ -11,6 +11,7 @@ class EventsManager:
         self.payload = {}
         self.topic_name = topic_name
         self.producer = None
+        self.consumer = None
 
     def create_producer(self):
         logging.info("Connecting to Kafka Producer")
