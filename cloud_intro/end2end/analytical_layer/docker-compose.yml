@@ -5,12 +5,12 @@ services:
     image: clickhouse/clickhouse-server:latest
     container_name: olap_db
     ports:
-      - "8124:8123"  # HTTP interface for queries
-      - "9001:9000"  # Native client connection port
+      - "8124:8123"  # HTTP interface
+      - "9001:9000"  # REST Interface
     environment:
-      CLICKHOUSE_USER: user        # Username
-      CLICKHOUSE_PASSWORD: password    # Password
-      CLICKHOUSE_DB: analytics_db            # Database name
+      CLICKHOUSE_USER: user        
+      CLICKHOUSE_PASSWORD: password   
+      CLICKHOUSE_DB: analytics_db
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
