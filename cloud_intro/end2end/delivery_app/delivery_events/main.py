@@ -26,13 +26,13 @@ def post_delivery_messages(producer, messages):
                     "order_id": message['order_id'],
                     "event_at": datetime.datetime.now().isoformat()
                 })
-        time.sleep(random.randint(3, 5))
+        time.sleep(random.randint(2, 4))
         producer.send_message({
             "delivery_status": "delivering",
             "order_id": message['order_id'],
             "event_at": datetime.datetime.now().isoformat()
         })
-        time.sleep(random.randint(10, 20))
+        time.sleep(random.randint(5, 10))
         producer.send_message({
             "delivery_status": "delivered",
             "order_id": message['order_id'],

@@ -5,47 +5,54 @@ from analytical_utils.utils import DbManager
 
 
 def syncronize_customers(db_conn_manager, data):
-    customers_ddl = """CREATE TABLE customers_temp (id UInt32, customer_name String,
-                                                    email String)
-                                                    ENGINE = MergeTree() ORDER BY id"""
+    customers_ddl = """CREATE TABLE analytics_db.customers_temp (id UInt32,
+                                                                 customer_name String,
+                                                                 email String)
+                                                                 ENGINE = MergeTree()
+                                                                 ORDER BY id"""
     customer_values = ", ".join(
                 f"({row[0]}, '{row[1]}', '{row[2]}')" for row in data
             )
-    db_conn_manager.write_to_analytical_db(data, 'customers', customers_ddl,
-                                           customer_values)
+    db_conn_manager.write_tables_to_analytical_db(data, 'customers', customers_ddl,
+                                                  customer_values)
 
 
 def syncronize_products(db_conn_manager, data):
-    products_ddl = """CREATE TABLE products_temp (id UInt32, product_name String,
-                                                  price Float32) ENGINE = MergeTree()
-                                                  ORDER BY id"""
+    products_ddl = """CREATE TABLE analytics_db.products_temp (id UInt32,
+                                                               product_name String,
+                                                               price Float32)
+                                                               ENGINE = MergeTree()
+                                                               ORDER BY id"""
     products_value = ", ".join(
                 f"""({row[0]}, '{row[1].replace("'", "")}', {row[2]})""" for row in data
             )
-    db_conn_manager.write_to_analytical_db(data, 'products', products_ddl, products_value)
+    db_conn_manager.write_tables_to_analytical_db(data, 'products', products_ddl,
+                                                  products_value)
 
 
 def syncronize_orders(db_conn_manager, data):
-    orders_ddl = """CREATE TABLE orders_temp (id UInt32, customer_id UInt32,
-                                              created_at DateTime, total_price Float32)
-                                              ENGINE = MergeTree() ORDER BY id """
+    orders_ddl = """CREATE TABLE analytics_db.orders_temp (id UInt32, customer_id UInt32,
+                                                           created_at DateTime,
+                                                           total_price Float32)
+                                                           ENGINE = MergeTree()
+                                                           ORDER BY id """
     orders_value = ", ".join(
                 f"""({row[0]}, {row[1]}, '{row[2].strftime('%Y-%m-%d %H:%M:%S')}',
                      {row[3]})""" for row in data
             )
-    db_conn_manager.write_to_analytical_db(data, 'orders', orders_ddl, orders_value)
+    db_conn_manager.write_tables_to_analytical_db(data, 'orders', orders_ddl, orders_value)
 
 
 def syncronize_order_products(db_conn_manager, data):
-    order_products_ddl = """CREATE TABLE order_products_temp
-                            (order_id UInt32, product_id UInt32, quantity UInt32, 
+    order_products_ddl = """CREATE TABLE analytics_db.order_products_temp
+                            (order_id UInt32, product_id UInt32, quantity UInt32,
                              price Float32) ENGINE = MergeTree()
                              ORDER BY (order_id, product_id)"""
     order_products_value = ", ".join(
                 f"""({row[0]}, {row[1]}, {row[2]}, {row[3]})""" for row in data
             )
-    db_conn_manager.write_to_analytical_db(data, 'order_products', order_products_ddl,
-                                           order_products_value)
+    db_conn_manager.write_tables_to_analytical_db(data, 'order_products',
+                                                  order_products_ddl, order_products_value)
 
 
 if __name__ == "__main__":

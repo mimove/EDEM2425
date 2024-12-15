@@ -47,7 +47,7 @@ class DbManager:
                 cursor_oltp.close()
                 logging.info("Closed PostgreSQL connection.")
 
-    def write_to_analytical_db(self, data, table, table_ddl, values):
+    def write_tables_to_analytical_db(self, data, table, table_ddl, values):
         try:
             client_olap = self._connect_clickhouse()
             logging.info(f"Fetched {len(data)} {table} from PostgreSQL.")
@@ -61,6 +61,16 @@ class DbManager:
                 RENAME TABLE {table} TO {table}_old, {table}_temp TO {table}
             """)
             client_olap.execute(f"DROP TABLE IF EXISTS {table}_old")
+            logging.info(f"Successfully synchronized {table}  table.")
+        except Exception as e:
+            logging.error(f"Error during customer synchronization: {e}")
+
+    def write_events_to_analytical_db(self, data, table, values):
+        try:
+            client_olap = self._connect_clickhouse()
+            logging.info(f"Fetched {len(data)} {table} from Kafka.")
+            query = f"INSERT INTO analytics_db.{table} VALUES {values}"
+            client_olap.execute(query)
             logging.info(f"Successfully synchronized {table}  table.")
         except Exception as e:
             logging.error(f"Error during customer synchronization: {e}")
@@ -81,7 +91,8 @@ class DeliveryEventsManager:
                 group_id=group_id,
                 auto_offset_reset=auto_offset_reset,
                 enable_auto_commit=enable_auto_commit,
-                value_deserializer=lambda v: json.loads(v.decode('utf-8'))
+                value_deserializer=lambda v: json.loads(v.decode('utf-8')),
+                consumer_timeout_ms=5000
             )
             logging.info('Kafka consumer connected successfully')
         except errors.NoBrokersAvailable as err:
@@ -93,9 +104,24 @@ class DeliveryEventsManager:
         if not self.consumer:
             logging.error("Consumer is not initialized. Call create_consumer() first.")
             return
+        empty_poll_count = 0
         try:
-            for message in self.consumer:
-                logging.info(f"Consumed message: {message.value}")
-                yield message.value
+            while True:
+                messages = self.consumer.poll(timeout_ms=1000)
+                if not messages:
+                    empty_poll_count += 1
+                    if empty_poll_count >= 2:
+                        logging.info("No more messages to consume. Exiting.")
+                        break
+                else:
+                    empty_poll_count = 0
+                    for _, msg_list in messages.items():
+                        for message in msg_list:
+                            logging.info(f"Consumed message: {message.value}")
+                            yield message.value
         except Exception as err:
             logging.error(f"Error while consuming messages: {err}")
+        finally:
+            if self.consumer:
+                self.consumer.close()
+                logging.info("Kafka consumer closed.")
