@@ -1,9 +1,9 @@
 version: '3.9'
 
 services:
-  postgres:
+  operational_db:
     image: postgres:latest
-    container_name: ecommerce_db
+    container_name: oltp_db
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
