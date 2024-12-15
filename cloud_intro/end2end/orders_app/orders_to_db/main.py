@@ -1,5 +1,4 @@
 import datetime
-import json
 import logging
 import os
 import random
@@ -86,4 +85,4 @@ if __name__ == "__main__":
         message = {'order_id': order_id, 'created_at': datetime.datetime.now().isoformat()}
         producer.send_message(message)
         num_orders_generated += 1
-        time.sleep(3)
+        time.sleep(10)
