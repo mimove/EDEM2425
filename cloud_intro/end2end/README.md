@@ -130,4 +130,64 @@ docker run -e KAFKA_IP=<delivery-app-ip> -e POSTGRES_IP=<orders-app-ip> -e HOST_
 ```
 
 
+### Metabase
+
+To configure the Clickhouse database in Metabase, the next steps should be followed:
+
+1. Set up the connections settings as seen in the following image
+    <p align="center">
+    <img src=".images/metabase_config.png" width=750px>
+    </p>
+
+2. Create a new question with the orders per customer
+   ```sql
+    SELECT
+    SUM(total_price) AS total_price,
+    c.customer_name
+    FROM
+    orders o
+    LEFT JOIN
+    customers c
+    ON
+    c.id = o.customer_id
+    GROUP BY
+    customer_name
+    ORDER BY
+    total_price desc
+    ```
+3. On the bottom left corner click visualization and choose the horizontal bars type
+4. Click save and also add it to a dashboard
+5. Create another question with the sql editor and paste this query
+   ```sql
+    SELECT
+    SUM(op.price*op.quantity) AS total_product_spent,
+    product_name
+    FROM
+    orders o
+    LEFT JOIN
+    order_products op
+    ON
+    o.id = op.order_id
+    LEFT JOIN
+    products p
+    ON
+    op.product_id = p.id
+    GROUP BY
+    product_name
+    ORDER BY
+    SUM(op.price*op.quantity) DESC
+    LIMIT
+    5
+    ```
+6. Select the pie chart as visualization option
+7. Click save and add it to the same dashboard
+8. If everything went right, you should see a dashboard like the following
+    <p align="center">
+    <img src=".images/metabase_dashboard.png" width=750px>
+    </p>
+
+
+
+
+
 
