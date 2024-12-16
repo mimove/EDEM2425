@@ -109,10 +109,25 @@ SHOW TABLES FROM analytics_db
 
 Run the following command to syncronize the orders table manually within the analytical_layer directory
 ```sh
-HOST_IP=localhost python -m el_orders.main
+HOST_IP=localhost POSTGRES_IP=localhost  python -m el_orders.main
 ```
 
 Run the following command to syncronize the delivery table manually within the analytical_layer directory
 ```sh
 HOST_IP=localhost KAFKA_IP=<delivery-app-host> python -m el_delivery.main
 ```
+
+To use the docker image that will trigger a cron expression you have to follow this steps:
+
+- Build the image from the root directory (end2end)
+```sh
+docker build -t analytical-layer-cron -f analytical_layer/docker/Dockerfile .
+```
+
+- Run the image passing the enviroment variables for the three machines (KAFKA, POSTGRES and HOST (your machine))
+```sh
+docker run -e KAFKA_IP=<delivery-app-ip> -e POSTGRES_IP=<orders-app-ip> -e HOST_IP=<your-machine-ip> analytical-layer-cron
+```
+
+
+

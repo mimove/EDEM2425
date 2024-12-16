@@ -68,11 +68,11 @@ if __name__ == "__main__":
         "dbname": "ecommerce",
         "user": "user",
         "password": "password",
-        "host": os.getenv('HOST_IP'),
+        "host": os.getenv('POSTGRES_IP'),
         "port": 5432,
     }
     OLAP_DB_CONFIG = {
-        "host": "localhost",
+        "host": os.getenv('HOST_IP'),
         "port": 9001,
         "database": "analytics_db",
         "user": "user",
