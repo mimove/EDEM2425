@@ -48,6 +48,22 @@ services:
     networks:
       - events-manager
 
+  kafka-init:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - kafka0
+      - kafka1
+    entrypoint: ["/bin/bash", "-c"]
+    command: |
+      "
+      echo 'Creating topics...'
+      kafka-topics --create --topic orders-confirmed --bootstrap-server kafka0:29092 --replication-factor 1 --partitions 1 &&
+      kafka-topics --create --topic delivery-events --bootstrap-server kafka0:29092 --replication-factor 1 --partitions 1 &&
+      echo 'Topics created successfully'
+      "
+    networks:
+      - events-manager
+
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui

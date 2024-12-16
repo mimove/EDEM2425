@@ -1,4 +1,5 @@
 import logging
+import os
 from datetime import datetime
 
 from analytical_utils.utils import DeliveryEventsManager, DbManager
@@ -39,7 +40,7 @@ if __name__ == "__main__":
     delivery_message_consumer.create_consumer(group_id='mimove-consumer')
     all_events = []
     OLAP_DB_CONFIG = {
-        "host": "localhost",
+        "host": os.getenv('HOST_IP'),
         "port": 9001,
         "database": "analytics_db",
         "user": "user",
