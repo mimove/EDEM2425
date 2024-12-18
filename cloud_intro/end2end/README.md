@@ -109,7 +109,7 @@ SHOW TABLES FROM analytics_db
 
 Run the following command to syncronize the orders table manually within the analytical_layer directory
 ```sh
-HOST_IP=localhost POSTGRES_IP=localhost  python -m el_orders.main
+HOST_IP=localhost POSTGRES_IP=<orders-app-ip>  python -m el_orders.main
 ```
 
 Run the following command to syncronize the delivery table manually within the analytical_layer directory

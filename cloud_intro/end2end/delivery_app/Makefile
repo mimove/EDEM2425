@@ -9,4 +9,4 @@ launch-events-brokers-ubuntu:
 	@HOST_IP=$(shell ip -o -4 addr show wlan0 | awk '{print $$4}' | cut -d/ -f1) docker-compose up -d
 
 stop-events-brokers:
-	docker-compose down
+	docker-compose down --volumes
