@@ -37,7 +37,7 @@ if __name__ == "__main__":
     )
     logger = logging.getLogger()
     delivery_message_consumer = DeliveryEventsManager('delivery-events')
-    delivery_message_consumer.create_consumer(group_id='mimove-consumer')
+    delivery_message_consumer.create_consumer(group_id='<edem-username>-consumer') # Change this line
     all_events = []
     OLAP_DB_CONFIG = {
         "host": os.getenv('HOST_IP'),
