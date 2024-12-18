@@ -112,10 +112,42 @@ Run the following command to syncronize the orders table manually within the ana
 HOST_IP=localhost POSTGRES_IP=<orders-app-ip>  python -m el_orders.main
 ```
 
+If you are using Windows CMD, you can run:
+
+```sh
+set HOST_IP=localhost
+set POSTGRES_IP=<orders-app-ip>
+python -m el_orders.main
+```
+
+
+If you are using Windows Powershell, you can run:
+
+```sh
+$env:HOST_IP = "localhost"
+$env:POSTGRES_IP = <orders-app-ip>
+python -m el_orders.main
+```
+
 Run the following command to syncronize the delivery table manually within the analytical_layer directory
 ```sh
 HOST_IP=localhost KAFKA_IP=<delivery-app-host> python -m el_delivery.main
 ```
+
+If you are using Windows CMD, you can run:
+```sh
+set HOST_IP="localhost"
+set KAFKA_IP="<delivery-app-host>"
+python -m el_delivery.main
+```
+
+If you are using Windows Powershell, you can run:
+```sh
+$env:HOST_IP = "localhost"
+$env:KAFKA_IP = "<delivery-app-host>"
+python -m el_delivery.main
+```
+
 
 To use the docker image that will trigger a cron expression you have to follow this steps:
 
@@ -124,9 +156,14 @@ To use the docker image that will trigger a cron expression you have to follow t
 docker build -t analytical-layer-cron -f analytical_layer/docker/Dockerfile .
 ```
 
+- Run the following command to get the Local Gateway of analytic_layer docker network
+```sh
+docker inspect olap_db
+```
+
 - Run the image passing the enviroment variables for the three machines (KAFKA, POSTGRES and HOST (your machine))
 ```sh
-docker run -e KAFKA_IP=<delivery-app-ip> -e POSTGRES_IP=<orders-app-ip> -e HOST_IP=<your-machine-ip> analytical-layer-cron
+docker run --network analytical_layer_default -e KAFKA_IP=<delivery-app-ip> -e POSTGRES_IP=<orders-app-ip> -e HOST_IP=<click-house-container-ip> analytical-layer-cron
 ```
 
 
