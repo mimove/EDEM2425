@@ -40,6 +40,21 @@ Run the following command inside orders_app in a VM or your local computer
 HOST_IP=localhost KAFKA_IP=<delivery-app-host> python -m orders_to_db.main
 ```
 
+In case you don't want the program to stop even if you close the terminal, you can run inside the delivery_app folder:
+```sh
+nohup bash -c 'HOST_IP=localhost KAFKA_IP=<delivery-app-host> python -m orders_to_db.main' > output.log 2>&1 &
+```
+
+To follow the logs run:
+```sh
+tail -f output.log
+```
+
+To stop the program, you can run:
+```sh
+pkill python
+```
+
 ## Delivery App
 
 Within the orders app there are three directories:
@@ -63,10 +78,31 @@ Launch the docker-compose in Ubuntu server
 make launch-events-brokers-ubuntu
 ```
 
+In any other machine, you can run, but you have to set up manually the ip of the Machine inside the Makefile file
+```sh
+make launch-events-brokers-manual-ip
+```
+
 Run the following command inside delivery_app in a VM or your local computer
 ```sh
 KAFKA_IP=<delivery-app-host> python -m delivery_events.main 
 ```
+
+In case you don't want the program to stop even if you close the terminal, you can run inside the delivery_app folder:
+```sh
+nohup bash -c 'KAFKA_IP=<delivery-app-host> python -m delivery_events.main' > output.log 2>&1 &
+```
+
+To follow the logs run:
+```sh
+tail -f output.log
+```
+
+To stop the program, you can run:
+```sh
+pkill python
+```
+
 
 ## Analytical Layer
 The analytical layer has several parts:
