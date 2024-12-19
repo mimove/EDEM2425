@@ -16,4 +16,4 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 
 RUN apt-get update && apt-get install -y cron && rm -rf /var/lib/apt/lists/* && chmod +x /app/cron_run.sh /app/start_cron.sh
 
-CMD ["/app/start_cron.sh"]
+CMD ["/app/start_cron.sh"] 
