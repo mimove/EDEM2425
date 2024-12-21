@@ -79,7 +79,7 @@ Launch the docker-compose
 ```sh
 docker-compose up -d
 ```
-Run the following command inside orders_app in a VM or your local computer. Substitute the <delivery-app-host> variable with the appropriate IP (IP of your VM if you run Kafka in a VM, IP of your local-machine if you are running Kafka directly in your computer)
+Run the following command inside orders_app in a VM or your local computer. Substitute the <delivery-app-host> variable with the appropriate IP (IP of your VM if you run Kafka in a VM, IP of your local-machine if you are running Kafka directly in your computer). You have to run this command from the following path `cloud_intro/end2end/orders_app/` as it will load different modules to use them inside the script of the folder `orders_to_db`
 ```sh
 HOST_IP=localhost KAFKA_IP=<delivery-app-host> python -m orders_to_db.main
 ```
@@ -108,7 +108,7 @@ Within the delivery app there are two directories:
 - [**utils**]: Similar to the utils of orders app, it is used to package the required code for publishing and reading messages from Kafka
 
 
-Run the following command inside delivery_app in a VM or your local computer
+Run the following command, in a VM or your local computer, from the following path `cloud_intro/end2end/delivery_app/` as it will load different modules to use them inside the script of the folder `delivery_events` 
 ```sh
 KAFKA_IP=<delivery-app-host> python -m delivery_events.main 
 ```
@@ -170,7 +170,7 @@ To show existing tables after inside the container
 SHOW TABLES FROM analytics_db
 ```
 
-Run the following command to syncronize the orders table manually within the analytical_layer directory
+Run the following command from the following path `cloud_intro/end2end/analytical_layer` as it will load different modules to use them inside the script of the folder `el_orders` to syncronize the orders table manually within the analytical_layer directory. You have to change the `<orders-app-ip>` placeholder with the IP of the machine in which you run the docker-compose of the orders_app (it could be your local machine or a VM)
 ```sh
 HOST_IP=localhost POSTGRES_IP=<orders-app-ip>  python -m el_orders.main
 ```
@@ -187,36 +187,31 @@ python -m el_orders.main
 If you are using Windows Powershell, you can run:
 
 ```sh
-$env:HOST_IP = "localhost"
-$env:POSTGRES_IP = <orders-app-ip>
-python -m el_orders.main
+$env:HOST_IP = "localhost"; $env:POSTGRES_IP = "<orders-app-ip>"; python -m el_orders.main
 ```
 
-Run the following command to syncronize the delivery table manually within the analytical_layer directory
+Run the following command to syncronize the delivery table manually within the analytical_layer directory. You have to change the `<delivery-app-ip>` placeholder with the IP of the machine in which you run the docker-compose of the orders_app (it could be your local machine or a VM)
 ```sh
-HOST_IP=localhost KAFKA_IP=<delivery-app-host> python -m el_delivery.main
+HOST_IP=localhost KAFKA_IP=<delivery-app-ip> python -m el_delivery.main
 ```
 
 If you are using Windows CMD, you can run:
 ```sh
 set HOST_IP="localhost"
-set KAFKA_IP="<delivery-app-host>"
+set KAFKA_IP="<delivery-app-ip>"
 python -m el_delivery.main
 ```
 
 If you are using Windows Powershell, you can run:
 ```sh
-$env:HOST_IP = "localhost"
-$env:KAFKA_IP = "<delivery-app-host>"
-python -m el_delivery.main
+$env:HOST_IP = "localhost"; $env:KAFKA_IP = "<delivery-app-ip>"; python -m el_delivery.main
 ```
-
 
 To use the docker image that will trigger a cron expression you have to follow this steps:
 
 - Build the image from the root directory (end2end)
 ```sh
-docker build -t analytical-layer-cron -f analytical_layer/docker/Dockerfile .
+docker build -t analytical-layer-cron -f analytical_layer/docker/DockerFile .
 ```
 
 - Run the following command to get the Local Gateway of analytic_layer docker network

@@ -11,6 +11,9 @@ COPY analytical_layer/analytical_utils /app/analytical_utils
 COPY analytical_layer/docker/cron_run.sh /app/cron_run.sh
 COPY analytical_layer/docker/start_cron.sh /app/start_cron.sh
 
+# Normalize line endings to LF
+RUN apt-get update && apt-get install -y dos2unix && \
+    dos2unix /app/cron_run.sh /app/start_cron.sh
 
 RUN pip install --no-cache-dir -r /app/requirements.txt 
 
