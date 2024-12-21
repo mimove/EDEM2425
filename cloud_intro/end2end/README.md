@@ -19,6 +19,50 @@ There are different components:
 
 - **Metabase**: Metabase is a BI tool used to make dashboards with different cards that can show different KPIs of a company.
 
+
+You should follow the next steps in order to deploy the full architecture
+
+### Deploy Kafka
+
+Go to the path `end2end/delivery_app`
+
+There is a Makefile included to show how Makefile work, symplifying the launching of commands. If you are using a Mac laptop, you can directly run the following command and it will take your IP directly
+
+Launch the docker-compose in Mac
+```sh
+ make launch-events-brokers-mac
+```
+
+If you are using an ubuntu server, the command to automatically pick your IP addres is the following
+Launch the docker-compose in Ubuntu server
+```sh
+make launch-events-brokers-ubuntu
+```
+
+In any other machine, you have to modify first the Makefile file inside the `end2end/delivery_app/` folder. Find the line `	@HOST_IP=<your-machine-ip> docker-compose up -d` and put your local IP in the <your-machine-ip>. To find your IP address you can run `Get-NetIPAddress` in PowerShell. Then you have to find the IP of your WiFi router. It will look similar to:
+
+```sh
+IPAddress      : 192.168.1.xxx
+InterFaceIndex : 15
+InterfaceAlias : Wi-Fi
+...
+...
+```
+
+Copy the IP address replacing the <your-machine-ip> variable. After that, you can run
+
+```sh
+make launch-events-brokers-manual-ip
+```
+
+Once the kafka brokers are ready (wait 3-5 minutes). You can login in your browser in the following url
+
+```sh
+http://<your-machine-ip>:8090
+```
+
+And you should see the Kafka-UI.
+
 ## Orders App
 
 Within the orders app there are three directories:
@@ -35,65 +79,46 @@ Launch the docker-compose
 ```sh
 docker-compose up -d
 ```
-Run the following command inside orders_app in a VM or your local computer
+Run the following command inside orders_app in a VM or your local computer. Substitute the <delivery-app-host> variable with the appropriate IP (IP of your VM if you run Kafka in a VM, IP of your local-machine if you are running Kafka directly in your computer)
 ```sh
 HOST_IP=localhost KAFKA_IP=<delivery-app-host> python -m orders_to_db.main
 ```
 
-In case you don't want the program to stop even if you close the terminal, you can run inside the delivery_app folder:
+In case you don't want the program to stop even if you close the terminal, you can run inside the delivery_app folder (only in Mac and Ubuntu):
 ```sh
 nohup bash -c 'HOST_IP=localhost KAFKA_IP=<delivery-app-host> python -m orders_to_db.main' > output.log 2>&1 &
 ```
 
-To follow the logs run:
+If your have run the `nohup` command, you can follow the logs running:
 ```sh
 tail -f output.log
 ```
 
-To stop the program, you can run:
+And to stop the program, you can run:
 ```sh
 pkill python
 ```
 
 ## Delivery App
 
-Within the orders app there are three directories:
+Within the delivery app there are two directories:
 
 - [**delivery_events**](./delivery_app/delivery_events/): It has a main script that handles both the pulling of messaging from the orders-event topic, and the pushing of the delivery events to the delivery-events topic
   
 - [**utils**]: Similar to the utils of orders app, it is used to package the required code for publishing and reading messages from Kafka
 
 
-### To run delivery_app
-
-There is a Makefile included to show how Makefile work, symplifying the launching of commands. 
-
-Launch the docker-compose in Mac
-```sh
- make launch-events-brokers-mac
-```
-
-Launch the docker-compose in Ubuntu server
-```sh
-make launch-events-brokers-ubuntu
-```
-
-In any other machine, you can run, but you have to set up manually the ip of the Machine inside the Makefile file
-```sh
-make launch-events-brokers-manual-ip
-```
-
 Run the following command inside delivery_app in a VM or your local computer
 ```sh
 KAFKA_IP=<delivery-app-host> python -m delivery_events.main 
 ```
 
-In case you don't want the program to stop even if you close the terminal, you can run inside the delivery_app folder:
+In case you don't want the program to stop even if you close the terminal, you can run inside the delivery_app folder (Only in Mac or Ubuntu):
 ```sh
 nohup bash -c 'KAFKA_IP=<delivery-app-host> python -m delivery_events.main' > output.log 2>&1 &
 ```
 
-To follow the logs run:
+If your haver run the `nohup` command, you can follow the logs running:
 ```sh
 tail -f output.log
 ```
@@ -119,11 +144,13 @@ The analytical layer has several parts:
 
 ### How to run the analytical layer
 
-To dowload the clickhouse plugin for metabase run the following
+To dowload the clickhouse plugin for metabase run the following if you are in Mac or Ubuntu
 
 ```sh
 curl -L -o ./analytical_layer/plugins/clickhouse.metabase-driver.jar https://github.com/ClickHouse/metabase-clickhouse-driver/releases/download/0.9.0/clickhouse.metabase-driver.jar
 ```
+
+If your are using windows, you can download manually the .jar copying the url `https://github.com/ClickHouse/metabase-clickhouse-driver/releases/download/0.9.0/clickhouse.metabase-driver.jar` in a browser and then moving the dowloaded file into the plugins directory manually.
 
 Launch the docker-compose
 ```sh
