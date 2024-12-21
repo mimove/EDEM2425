@@ -64,11 +64,11 @@ def close_connection(connection, cursor):
 
 if __name__ == "__main__":
     # Connection details
-    POSTGRES_HOST = "192.168.1.12"
+    POSTGRES_HOST = "<DB_IP_ADDRESS>"
     POSTGRES_PORT = "5432"
-    POSTGRES_USER = "mimove"
-    POSTGRES_PASSWORD = "edem2425"
-    POSTGRES_DB = "mimove_db"
+    POSTGRES_USER = "<edem-user>"
+    POSTGRES_PASSWORD = "<edem-password>"
+    POSTGRES_DB = "<edem-db>"
     connection, cursor = create_connection(POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD,
                                           POSTGRES_HOST, POSTGRES_PORT)
     create_table(connection, cursor)
