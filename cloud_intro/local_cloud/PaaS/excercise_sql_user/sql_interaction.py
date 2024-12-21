@@ -23,11 +23,11 @@ def create_connection(POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD,
             host=POSTGRES_HOST,
             port=POSTGRES_PORT,
         )
-        logging.info("Connected to the database!")
+        logger.info("Connected to the database!")
         cursor = connection.cursor()
         return connection, cursor
     except Exception as e:
-        logging.error(f"An error occurred: {e}")
+        logger.error(f"An error occurred: {e}")
 
 
 def create_table(connection, cursor):
@@ -39,7 +39,7 @@ def create_table(connection, cursor):
         );
     """)
     connection.commit()
-    logging.info("Table 'cloud_providers' created successfully.")
+    logger.info("Table 'cloud_providers' created successfully.")
 
 
 def insert_values(connection, cursor):
@@ -48,7 +48,7 @@ def insert_values(connection, cursor):
         VALUES ('AWS', 2002), ('GCP', 2008), ('AZURE', 2010);
     """)
     connection.commit()
-    logging.info("Data inserted successfully.")
+    logger.info("Data inserted successfully.")
 
 
 def query_table(cursor):
@@ -59,7 +59,7 @@ def query_table(cursor):
 def close_connection(connection, cursor):
     cursor.close()
     connection.close()
-    logging.info("Connection closed.")
+    logger.info("Connection closed.")
 
 
 if __name__ == "__main__":
@@ -75,4 +75,4 @@ if __name__ == "__main__":
     insert_values(connection, cursor)
     table_rows = query_table(cursor)
     for row in table_rows:
-        logging.info(row)
+        logger.info(row)
