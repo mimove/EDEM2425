@@ -70,7 +70,7 @@ To do so follow the next steps:
     ```
 
 2. Create a folder called `css` by running `sudo mkdir /var/www/html/css`
-3. Copy the following content inside the newly created `/var/www/html/css`
+3. Copy the following content inside the newly created `/var/www/html/css` in a file called `style.css`
    ```css
     body {
         font-family: Arial, sans-serif;
@@ -103,7 +103,7 @@ To do so follow the next steps:
     This will change the style of each of the 3 sections of our website
 
 4. Create a folder called `js` by running `sudo mkdir /var/www/html/js`
-5. Copy the following content inside the newly created folder
+5. Copy the following content inside the newly created folder in file called `script.js`
    ```js
     document.addEventListener("DOMContentLoaded", () => {
         const button = document.createElement("button");
