@@ -69,15 +69,12 @@ def make_token(args):
   token = t.confluent_token()
   return token
 
-kafka_cluster_name = 'CLUSTER_ID'
-region = 'us-central1'
-project_id = 'PROJECT_ID'
-port = '9092'
-kafka_topic_name = 'example-topic'
+
+kafka_topic_name = 'orders-confirmed'
 
 # Kafka Producer configuration with OAUTHBEARER authentication
 config = {
-    'bootstrap.servers': f'bootstrap.{kafka_cluster_name}.{region}.managedkafka.{project_id}.cloud.goog:{port}',
+    'bootstrap.servers': 'bootstrap.edem-kafka-mimove.europe-west1.managedkafka.edem-24-25-mimove.cloud.goog:9092',
     'security.protocol': 'SASL_SSL',
     'sasl.mechanisms': 'OAUTHBEARER',
     'oauth_cb': make_token,
