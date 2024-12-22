@@ -50,3 +50,55 @@ Once the instance is created, we have to connect to it. We have several options:
 - **SSH from the command line**: This option is available for both Linux and Windows instances. It is the most flexible option, but it requires to install the Cloud SDK in your local machine.
 
   - [Install Cloud SDK](https://cloud.google.com/sdk/docs/install)
+
+
+### Use of gcloud CLI to create and manage instances
+
+- Login to your account
+```bash
+gcloud auth login
+```
+
+- Set the project
+```bash
+gcloud config set project <PROJECT_ID>
+```
+
+- Create a new instance
+```bash
+gcloud compute instances create <INSTANCE_NAME> --zone=<ZONE> --machine-type=<TYPE> --image=<IMAGE>
+```
+
+For example, for a e2-micro instance in europe-southwest1-a zone:
+```bash
+gcloud compute instances create my-instance \
+  --zone=europe-southwest1-a \
+  --machine-type=e2-micro \
+  --image-project=debian-cloud \
+  --image=debian-12-bookworm-v20241210 \
+  --boot-disk-size=10GB
+```
+
+- List the instances
+```bash
+gcloud compute instances list
+```
+
+
+- SSH to the instance
+```bash
+gcloud compute ssh <INSTANCE_NAME> --zone=<ZONE>
+```
+
+- Copy files and folders to the instance
+```bash
+gcloud compute scp <SOURCE> <INSTANCE_NAME>:<DESTINATION> --zone=<ZONE>
+```
+
+- Delete an instance
+```bash
+gcloud compute instances delete <INSTANCE_NAME> --zone=<ZONE>
+```
+
+
+
