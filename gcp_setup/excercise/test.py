@@ -78,6 +78,8 @@ config = {
     'security.protocol': 'SASL_SSL',
     'sasl.mechanisms': 'OAUTHBEARER',
     'oauth_cb': make_token,
+    'debug': 'security,broker,protocol'  # Add debug logging
+
 }
 
 producer = confluent_kafka.Producer(config)
