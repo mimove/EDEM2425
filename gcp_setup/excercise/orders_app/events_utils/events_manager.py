@@ -24,9 +24,9 @@ class EventsManager:
         try:
             config = {
                         'bootstrap.servers': f'{KAFKA_IP}:9092',
-                        'security.protocol': 'SASL_SSL',
-                        'sasl.mechanisms': 'OAUTHBEARER',
-                        'oauth_cb': self._make_token,
+                        # 'security.protocol': 'SASL_SSL',
+                        # 'sasl.mechanisms': 'OAUTHBEARER',
+                        # 'oauth_cb': self._make_token,
                     }
             self.producer = Producer(config)
             logging.info('Kafka producer connected succesfully')
