@@ -25,15 +25,15 @@ class TokenProvider(object):
     return self.credentials
 
   def get_jwt(self, creds):
-    return json.dumps(
-        dict(
-            exp=creds.expiry.timestamp(),
-            iss='Google',
-            iat=datetime.datetime.now(datetime.timezone.utc).timestamp(),
-            scope='kafka',
-            sub=creds.service_account_email,
-        )
-    )
+      return json.dumps(
+          dict(
+              iss="https://accounts.google.com",
+              aud="https://oauth2.googleapis.com/token",
+              scope="https://www.googleapis.com/auth/cloud-platform",
+              iat=datetime.datetime.now(datetime.timezone.utc).timestamp(),
+              exp=(datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)).timestamp(),
+          )
+      )
 
   def b64_encode(self, source):
     return (
