@@ -66,22 +66,28 @@ gcloud config set project <PROJECT_ID>
 
 - Create a new instance
 ```bash
-gcloud compute instances create <INSTANCE_NAME> --zone=<ZONE> --machine-type=<TYPE> --image=<
+gcloud compute instances create <INSTANCE_NAME> --zone=<ZONE> --machine-type=<TYPE> --image=<IMAGE>
 ```
 
 For example, for a e2-micro instance in europe-southwest1-a zone:
 ```bash
-gcloud compute instances create my-instance --zone=europe-southwest1-a --machine-type=e2-micro --image=debian-10-buster-v20210916
-```
-
-- SSH to the instance
-```bash
-gcloud compute ssh <INSTANCE_NAME> --zone=<ZONE>
+gcloud compute instances create my-instance \
+  --zone=europe-southwest1-a \
+  --machine-type=e2-micro \
+  --image-project=debian-cloud \
+  --image=debian-12-bookworm-v20241210 \
+  --boot-disk-size=10GB
 ```
 
 - List the instances
 ```bash
 gcloud compute instances list
+```
+
+
+- SSH to the instance
+```bash
+gcloud compute ssh <INSTANCE_NAME> --zone=<ZONE>
 ```
 
 - Copy files and folders to the instance
