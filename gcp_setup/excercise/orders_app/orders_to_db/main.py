@@ -7,7 +7,7 @@ import time
 
 import psycopg2
 
-from chatgpt_orders.orders_handler import get_limited_products, get_limited_users,\
+from orders_app.chatgpt_orders.orders_handler import get_limited_products, get_limited_users,\
                                           create_order
 from events_utils.events_manager import EventsManager
 
