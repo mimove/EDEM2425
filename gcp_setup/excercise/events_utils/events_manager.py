@@ -9,7 +9,7 @@ import time
 import google.auth
 import google.auth.transport.urllib3
 import urllib3
-from confluent_kafka import Producer
+from confluent_kafka import Producer, Consumer
 
 class TokenProvider(object):
 
@@ -99,3 +99,44 @@ class EventsManager:
             logging.info('Message sent correctly')
         except ValueError as err:
             logging.err(f"Couldn't send message {message} due to {err}")
+
+    def create_consumer(self, group_id='default-group', auto_offset_reset='earliest',
+                        enable_auto_commit=True):
+        logging.info("Connecting to Kafka Consumer")
+        KAFKA_IP = os.getenv('KAFKA_IP')
+        try:
+            config = {
+                        'bootstrap.servers': KAFKA_IP,
+                        'security.protocol': 'SASL_SSL',
+                        'sasl.mechanisms': 'OAUTHBEARER',
+                        'oauth_cb': make_token,
+                        'group.id': group_id,
+                        'auto.offset.reset': auto_offset_reset,
+                        'enable.auto.commit': enable_auto_commit,
+                    }
+            self.consumer = Consumer(config)
+            self.consumer.subscribe([self.topic_name])
+            logging.info('Kafka consumer connected successfully')
+        except ValueError as err:
+            logging.error(f"Failed to connect to Kafka Consumer: {err}")
+            sys.exit(1)
+      
+    def consume_messages(self):
+        logging.info('Consuming messages...')
+        if not self.consumer:
+            logging.error("Consumer is not initialized. Call create_consumer() first.")
+            return
+        try:
+            while True:
+                message = self.consumer.poll(timeout=1.0)
+                if message is None:
+                    continue
+                if message.error():
+                    logging.error(f"Consumer error: {message.error()}")
+                    continue
+                logging.info(f"Message received: {message.value().decode('utf-8')}")
+        except KeyboardInterrupt:
+            logging.info("Interrupted by user")
+        finally:
+            self.consumer.close()
+            logging.info("Consumer closed")

@@ -2,7 +2,7 @@ import datetime
 import logging
 import time
 import random
-from utils.events_manager import EventsManager
+from events_utils.events_manager import EventsManager
 
 
 def get_confirmed_orders(message):
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         ]
     )
     logger = logging.getLogger()
-    consumer = EventsManager('orders-confirmed')
+    consumer = EventsManager('order-events')
     consumer.create_consumer()
     producer = EventsManager('delivery-events')
     producer.create_producer()
