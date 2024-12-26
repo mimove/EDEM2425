@@ -23,19 +23,38 @@ In particular, we will focus on deploying the `orders-app` and the `delivery-app
 
 ### Create the instance for the `orders-app`
 
-For the `orders-app` we will create the VM instance using Google's UI as we did at the beginning of the class.
+For the `orders-app` we will create the VM instance using gcloud.
 
-The characteristics of this instance have to be:
+The command is the following:
 
-1. Name: orders-app-<edem-user>
-2. Region: europe-west1 (Belgium)
-3. Image: Debian GNU/Linux 11 (bullseye) on x86/64
-4. Machine type: e2-medium (2 vCPU, 1 core, 4 GB memory)
-5. Disk size: 10 GB
-6. Network: Allow HTTP traffic and HTTPS traffic
-7. Network tag: `ejercicio-gcp-setup`
+```sh
+gcloud compute instances create orders-app \
+  --zone=europe-west1-b \
+  --scopes=https://www.googleapis.com/auth/cloud-platform \
+  --subnet=projects/<your-project-id>/regions/europe-west1/subnetworks/default \
+  --machine-type=e2-micro \
+  --image-project=debian-cloud \
+  --image=debian-11-bullseye-v20241210 \
+  --boot-disk-size=10GB
+```
 
-Once the VM instance is created, copy the gcloud command to log into it using a terminal in your laptop.
+This command will create a VM instance with the following characteristics:
+
+- Name: `orders-app`
+- Zone: `europe-west1-b`
+- Scopes: `https://www.googleapis.com/auth/cloud-platform`
+- Subnet: `projects/<your-project-id>/regions/europe-west1/subnetworks/default`
+- Machine type: `e2-micro`
+- Image: `debian-11-bullseye-v20241210`
+- Boot disk size: `10GB`
+  
+This configuration is requried to run the `orders-app` in the same network as the Kafka cluster.
+
+Once the VM instance is created, you can log in to the instance using the following command:
+
+```sh
+gcloud compute ssh orders-app --zone=europe-west1-b
+```
 
 After you have successfully logged in, follow this steps to install docker:
 
