@@ -70,6 +70,7 @@ class EventsManager:
         """Method to get the Token"""
         t = TokenProvider()
         token = t.confluent_token()
+        print("Generated Token:", token)
         return token
 
 
