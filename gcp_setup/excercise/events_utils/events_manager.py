@@ -127,14 +127,11 @@ class EventsManager:
             logging.error("Consumer is not initialized. Call create_consumer() first.")
             return
         try:
-            while True:
-                message = self.consumer.poll(timeout=1.0)
-                if message is None:
-                    continue
-                if message.error():
-                    logging.error(f"Consumer error: {message.error()}")
-                    continue
-                logging.info(f"Message received: {message.value().decode('utf-8')}")
+            for message in self.consumer:
+                logging.info(f"Consumed message: {message.value().decode('utf-8')}")
+                yield json.loads(message.value().decode('utf-8'))
+        except Exception as err:
+            logging.error(f"Couldn't consume message due to {err}")
         except KeyboardInterrupt:
             logging.info("Interrupted by user")
         finally:
