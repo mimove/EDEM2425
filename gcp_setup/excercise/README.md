@@ -37,5 +37,75 @@ The characteristics of this instance have to be:
 
 Once the VM instance is created, copy the gcloud command to log into it using a terminal in your laptop.
 
-After you have successfully logged in, follow this steps to install docker
+After you have successfully logged in, follow this steps to install docker:
+
+1. Update de package index:
+   ```sh
+   sudo apt-get update
+   ```
+
+2. Install the necessary packages to allow apt to use a repository over HTTPS:
+   ```sh
+   sudo apt-get install apt-transport-https ca-certificates curl gnupg lsb-release
+   ```
+
+3. Add Docker’s official GPG key:
+   ```sh
+   curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+   ````
+
+4. Add Docker's stable repository:
+   ```sh
+   echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+   ```
+
+5. Update the package index again:
+   ```sh
+   sudo apt-get update
+   ```
+
+6. Install Docker:
+   ```sh
+   sudo apt-get install docker-ce docker-ce-cli containerd.io
+   ```
+
+7. Add your user to the docker group:
+   ```sh
+   sudo usermod -aG docker $USER
+   ```
+
+8. Log out and log back in so that your group membership is re-evaluated.
+
+9. Verify that Docker is installed correctly by running the hello-world image:
+   ```sh
+   docker run hello-world
+   ```
+
+10. Install docker-compose by downloading the binary:
+   ```sh
+   sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+   ```
+
+11. Apply executable permissions to the binary:
+   ```sh
+   sudo chmod +x /usr/local/bin/docker-compose
+   ```
+
+12. Verify that docker-compose is installed correctly:
+   ```sh
+   docker-compose --version
+   ```
+
+
+Now that we have docker and docker-compose installed, we can clone the repository with the `orders-app` code and run it.
+
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/mimove/EDEM2425.git
+   ```
+
+2. Change to the directory of the `orders-app`:
+   ```sh
+   cd EDEM2425/gcp_setup/excercise/orders-app
+   ```
 
