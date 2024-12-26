@@ -60,18 +60,22 @@ class TokenProvider(object):
 
     return self.get_kafka_access_token(creds), time.time() + expiry_seconds
 
+
+def make_token(args):
+    """Method to get the Token"""
+    t = TokenProvider()
+    token = t.confluent_token()
+    print("Generated Token:", token)
+    return token
+
+
 class EventsManager:
     def __init__(self, topic_name):
         self.payload = {}
         self.topic_name = topic_name
         self.producer = None
     
-    def _make_token(args):
-        """Method to get the Token"""
-        t = TokenProvider()
-        token = t.confluent_token()
-        print("Generated Token:", token)
-        return token
+
 
 
     def create_producer(self):
@@ -82,7 +86,7 @@ class EventsManager:
                         'bootstrap.servers': f'{KAFKA_IP}:9092',
                         'security.protocol': 'SASL_SSL',
                         'sasl.mechanisms': 'OAUTHBEARER',
-                        'oauth_cb': self._make_token,
+                        'oauth_cb': make_token,
                     }
             self.producer = Producer(config)
             logging.info('Kafka producer connected succesfully')
