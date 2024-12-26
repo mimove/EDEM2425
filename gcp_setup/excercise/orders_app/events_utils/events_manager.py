@@ -83,7 +83,7 @@ class EventsManager:
         KAFKA_IP = os.getenv('KAFKA_IP')
         try:
             config = {
-                        'bootstrap.servers': f'{KAFKA_IP}:9092',
+                        'bootstrap.servers': f'{KAFKA_IP}',
                         'security.protocol': 'SASL_SSL',
                         'sasl.mechanisms': 'OAUTHBEARER',
                         'oauth_cb': make_token,
