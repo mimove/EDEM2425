@@ -65,7 +65,6 @@ def make_token(args):
     """Method to get the Token"""
     t = TokenProvider()
     token = t.confluent_token()
-    print("Generated Token:", token)
     return token
 
 
@@ -75,15 +74,12 @@ class EventsManager:
         self.topic_name = topic_name
         self.producer = None
     
-
-
-
     def create_producer(self):
         logging.info("Connecting to Kafka Producer")
         KAFKA_IP = os.getenv('KAFKA_IP')
         try:
             config = {
-                        'bootstrap.servers': f'{KAFKA_IP}',
+                        'bootstrap.servers': KAFKA_IP,
                         'security.protocol': 'SASL_SSL',
                         'sasl.mechanisms': 'OAUTHBEARER',
                         'oauth_cb': make_token,
