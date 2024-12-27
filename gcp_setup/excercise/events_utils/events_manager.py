@@ -31,7 +31,8 @@ class EventsManager:
         logging.info('Sending messages...')
         try:
             serialized_data = json.dumps(message).encode('utf-8')
-            self.publisher.publish(self.topic_path, serialized_data)
+            future = self.publisher.publish(self.topic_path, serialized_data)
+            future.result()
             logging.info('Message sent correctly')
         except ValueError as err:
             logging.err(f"Couldn't send message {message} due to {err}")
