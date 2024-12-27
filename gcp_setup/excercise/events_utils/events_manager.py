@@ -51,22 +51,26 @@ class EventsManager:
             sys.exit(1)
       
     def consume_messages(self):
-        logging.info('Consuming messages...')
-        if not self.subscriber:
-            logging.error("Subscriber is not initialized. Call create_subscriber() first.")
-            return
-        try:
-            response = self.subscriber.pull(self.subscriber_path, max_messages=10)
-            for received_message in response.received_messages:
-                self.subscriber.acknowledge(self.subscriber_path,
-                                            [received_message.ack_id])
-                logging.info(f"""Consumed message:
-                             {received_message.message.data.decode('utf-8')}""")
-                yield json.loads(received_message.message.data.decode('utf-8'))
-        except Exception as err:
-            logging.error(f"Couldn't consume message due to {err}")
-        except KeyboardInterrupt:
-            logging.info("Interrupted by user")
-        finally:
-            self.consumer.close()
-            logging.info("Consumer closed")
+      logging.info('Consuming messages...')
+      if not self.subscriber:
+          logging.error("Subscriber is not initialized. Call create_subscriber() first.")
+          return
+      try:
+          request = pubsub_v1.types.PullRequest(
+              subscription=self.subscriber_path,
+              max_messages=10
+          )
+          response = self.subscriber.pull(request=request)
+          for received_message in response.received_messages:
+              self.subscriber.acknowledge(
+                  request={"subscription": self.subscriber_path, "ack_ids": [received_message.ack_id]}
+              )
+              logging.info(f"Consumed message: {received_message.message.data.decode('utf-8')}")
+              yield json.loads(received_message.message.data.decode('utf-8'))
+      except Exception as err:
+          logging.error(f"Couldn't consume message due to {err}")
+      except KeyboardInterrupt:
+          logging.info("Interrupted by user")
+      finally:
+          self.subscriber.close()
+          logging.info("Subscriber closed")
