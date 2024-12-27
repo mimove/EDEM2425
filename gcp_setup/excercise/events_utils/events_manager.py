@@ -71,6 +71,3 @@ class EventsManager:
           logging.error(f"Couldn't consume message due to {err}")
       except KeyboardInterrupt:
           logging.info("Interrupted by user")
-      finally:
-          self.subscriber.close()
-          logging.info("Subscriber closed")
