@@ -11,6 +11,7 @@ class EventsManager:
     def __init__(self, topic_name):
         self.payload = {}
         self.topic_name = topic_name
+        self.subscription_name = None
         self.publisher = None
         self.topic_path = None
         self.subscriber = None
@@ -37,13 +38,13 @@ class EventsManager:
         except ValueError as err:
             logging.err(f"Couldn't send message {message} due to {err}")
 
-    def create_subscriber(self, subscription_name):
+    def create_subscriber(self):
         logging.info("Connecting to PubSub Subscriptor")
         PROJECT_ID = os.getenv('PROJECT_ID')
         try:
             self.subscriber = pubsub_v1.SubscriberClient()
             self.subscriber_path = self.subscriber.subscription_path(PROJECT_ID,
-                                                                   subscription_name)
+                                                                     self.subscription_name)
             logging.info('PubSub subscriber connected successfully')
         except ValueError as err:
             logging.error(f"Failed to connect to PubSub Subscriber: {err}")
