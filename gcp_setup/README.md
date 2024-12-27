@@ -69,9 +69,9 @@ gcloud config set project <PROJECT_ID>
 gcloud compute instances create <INSTANCE_NAME> --zone=<ZONE> --machine-type=<TYPE> --image=<IMAGE>
 ```
 
-For example, for a e2-micro instance in europe-southwest1-a zone:
+For example, for a e2-micro instance in europe-southwest1-a (Madrid) zone:
 ```bash
-gcloud compute instances create my-instance \
+gcloud compute instances create <INSTANCE-NAME> \
   --zone=europe-southwest1-a \
   --machine-type=e2-micro \
   --image-project=debian-cloud \
@@ -83,7 +83,6 @@ gcloud compute instances create my-instance \
 ```bash
 gcloud compute instances list
 ```
-
 
 - SSH to the instance
 ```bash
@@ -99,6 +98,3 @@ gcloud compute scp <SOURCE> <INSTANCE_NAME>:<DESTINATION> --zone=<ZONE>
 ```bash
 gcloud compute instances delete <INSTANCE_NAME> --zone=<ZONE>
 ```
-
-
-
