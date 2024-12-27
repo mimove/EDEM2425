@@ -84,7 +84,6 @@ gcloud compute instances create <INSTANCE-NAME> \
 gcloud compute instances list
 ```
 
-
 - SSH to the instance
 ```bash
 gcloud compute ssh <INSTANCE_NAME> --zone=<ZONE>
@@ -99,6 +98,3 @@ gcloud compute scp <SOURCE> <INSTANCE_NAME>:<DESTINATION> --zone=<ZONE>
 ```bash
 gcloud compute instances delete <INSTANCE_NAME> --zone=<ZONE>
 ```
-
-
-
