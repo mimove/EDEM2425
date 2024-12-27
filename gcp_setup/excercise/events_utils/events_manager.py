@@ -57,9 +57,10 @@ class EventsManager:
         try:
             response = self.subscriber.pull(self.subscriber_path, max_messages=10)
             for received_message in response.received_messages:
-                self.subscriber.acknowledge(self.subscriber_path, [message.ack_id])
-                logging.info(f"Consumed message: {received_message.message.data.\
-                                                  decode('utf-8')}")
+                self.subscriber.acknowledge(self.subscriber_path,
+                                            [received_message.ack_id])
+                logging.info(f"""Consumed message:
+                             {received_message.message.data.decode('utf-8')}""")
                 yield json.loads(received_message.message.data.decode('utf-8'))
         except Exception as err:
             logging.error(f"Couldn't consume message due to {err}")
