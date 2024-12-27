@@ -4,132 +4,62 @@ import logging
 import json
 import os
 import sys
-import time
 
-import google.auth
-import google.auth.transport.urllib3
-import urllib3
-from confluent_kafka import Producer, Consumer
-
-class TokenProvider(object):
-
-  def __init__(self, **config):
-    self.credentials, _project = google.auth.default()
-    self.http_client = urllib3.PoolManager()
-    self.HEADER = json.dumps(dict(typ='JWT', alg='GOOG_OAUTH2_TOKEN'))
-
-  def valid_credentials(self):
-    if not self.credentials.valid:
-      self.credentials.refresh(google.auth.transport.urllib3.Request(self.http_client))
-    return self.credentials
-
-  def get_jwt(self, creds):
-    return json.dumps(
-        dict(
-            exp=creds.expiry.timestamp(),
-            iss='Google',
-            iat=datetime.datetime.now(datetime.timezone.utc).timestamp(),
-            scope='kafka',
-            sub=creds.service_account_email,
-        )
-    )
-
-  def b64_encode(self, source):
-    return (
-        base64.urlsafe_b64encode(source.encode('utf-8'))
-        .decode('utf-8')
-        .rstrip('=')
-    )
-
-  def get_kafka_access_token(self, creds):
-    return '.'.join([
-      self.b64_encode(self.HEADER),
-      self.b64_encode(self.get_jwt(creds)),
-      self.b64_encode(creds.token)
-    ])
-
-  def token(self):
-    creds = self.valid_credentials()
-    return self.get_kafka_access_token(creds)
-
-  def confluent_token(self):
-    creds = self.valid_credentials()
-
-    utc_expiry = creds.expiry.replace(tzinfo=datetime.timezone.utc)
-    expiry_seconds = (utc_expiry - datetime.datetime.now(datetime.timezone.utc)).total_seconds()
-
-    return self.get_kafka_access_token(creds), time.time() + expiry_seconds
-
-
-def make_token(args):
-    """Method to get the Token"""
-    t = TokenProvider()
-    token = t.confluent_token()
-    return token
-
+from google.cloud import pubsub_v1
 
 class EventsManager:
     def __init__(self, topic_name):
         self.payload = {}
         self.topic_name = topic_name
-        self.producer = None
+        self.publisher = None
+        self.topic_path = None
+        self.subscriber = None
+        self.subscriber_path = None
     
     def create_producer(self):
         logging.info("Connecting to Kafka Producer")
-        KAFKA_IP = os.getenv('KAFKA_IP')
+        PROJECT_ID = os.getenv('PROJECT_ID')
         try:
-            config = {
-                        'bootstrap.servers': KAFKA_IP,
-                        'security.protocol': 'SASL_SSL',
-                        'sasl.mechanisms': 'OAUTHBEARER',
-                        'oauth_cb': make_token,
-                    }
-            self.producer = Producer(config)
-            logging.info('Kafka producer connected succesfully')
+            self.publisher = pubsub_v1.PublisherClient()
+            self.topic_path = self.publisher.topic_path(PROJECT_ID, self.topic_name)
+            logging.info('PubSub publisher connected succesfully')
         except ValueError as err:
-            logging.error(f"Failed to connect to Kafka Producer: {err}")
+            logging.error(f"Failed to connect to PubSub Publisher: {err}")
             sys.exit(1)
 
     def send_message(self, message):
         logging.info('Sending messages...')
         try:
             serialized_data = json.dumps(message).encode('utf-8')
-            self.producer.produce(self.topic_name, serialized_data)
-            self.producer.flush()
+            self.publisher.publish(self.topic_path, serialized_data)
             logging.info('Message sent correctly')
         except ValueError as err:
             logging.err(f"Couldn't send message {message} due to {err}")
 
-    def create_consumer(self, group_id='default-group', auto_offset_reset='earliest',
-                        enable_auto_commit=True):
-        logging.info("Connecting to Kafka Consumer")
-        KAFKA_IP = os.getenv('KAFKA_IP')
+    def create_subscriber(self, subscription_name):
+        logging.info("Connecting to PubSub Subscriptor")
+        PROJECT_ID = os.getenv('PROJECT_ID')
         try:
-            config = {
-                        'bootstrap.servers': KAFKA_IP,
-                        'security.protocol': 'SASL_SSL',
-                        'sasl.mechanisms': 'OAUTHBEARER',
-                        'oauth_cb': make_token,
-                        'group.id': group_id,
-                        'auto.offset.reset': auto_offset_reset,
-                        'enable.auto.commit': enable_auto_commit,
-                    }
-            self.consumer = Consumer(config)
-            self.consumer.subscribe([self.topic_name])
-            logging.info('Kafka consumer connected successfully')
+            self.subscriber = pubsub_v1.SubscriberClient()
+            self.subscriber_path = self.subscriber.subscription_path(PROJECT_ID,
+                                                                   subscription_name)
+            logging.info('PubSub subscriber connected successfully')
         except ValueError as err:
-            logging.error(f"Failed to connect to Kafka Consumer: {err}")
+            logging.error(f"Failed to connect to PubSub Subscriber: {err}")
             sys.exit(1)
       
     def consume_messages(self):
         logging.info('Consuming messages...')
-        if not self.consumer:
-            logging.error("Consumer is not initialized. Call create_consumer() first.")
+        if not self.subscriber:
+            logging.error("Subscriber is not initialized. Call create_subscriber() first.")
             return
         try:
-            for message in self.consumer:
-                logging.info(f"Consumed message: {message.value().decode('utf-8')}")
-                yield json.loads(message.value().decode('utf-8'))
+            response = self.subscriber.pull(self.subscriber_path, max_messages=10)
+            for received_message in response.received_messages:
+                self.subscriber.acknowledge(self.subscriber_path, [message.ack_id])
+                logging.info(f"Consumed message: {received_message.message.data.\
+                                                  decode('utf-8')}")
+                yield json.loads(received_message.message.data.decode('utf-8'))
         except Exception as err:
             logging.error(f"Couldn't consume message due to {err}")
         except KeyboardInterrupt:
