@@ -49,9 +49,9 @@ if __name__ == "__main__":
         ]
     )
     logger = logging.getLogger()
-    subscriber = EventsManager('order-events-sub')
+    subscriber = EventsManager(subscription_name='order-events-sub')
     subscriber.create_subscriber()
-    publisher = EventsManager('delivery-events')
+    publisher = EventsManager(topic_name='delivery-events')
     publisher.create_publisher()
     while True:
         try:

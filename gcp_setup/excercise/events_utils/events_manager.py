@@ -8,17 +8,17 @@ import sys
 from google.cloud import pubsub_v1
 
 class EventsManager:
-    def __init__(self, topic_name):
+    def __init__(self, topic_name=None, subscription_name=None):
         self.payload = {}
         self.topic_name = topic_name
-        self.subscription_name = None
+        self.subscription_name = subscription_name
         self.publisher = None
         self.topic_path = None
         self.subscriber = None
         self.subscriber_path = None
     
     def create_publisher(self):
-        logging.info("Connecting to Kafka Producer")
+        logging.info("Connecting to PubSub Publisher")
         PROJECT_ID = os.getenv('PROJECT_ID')
         try:
             self.publisher = pubsub_v1.PublisherClient()
