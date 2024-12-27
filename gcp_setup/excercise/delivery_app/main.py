@@ -18,22 +18,22 @@ def get_confirmed_orders(message):
         raise
 
 
-def post_delivery_messages(producer, messages):
+def post_delivery_messages(publisher, messages):
     for message in messages:
         logging.info(f"Delivering order {message['order_id']}")
-        producer.send_message({
+        publisher.send_message({
                     "delivery_status": "processing",
                     "order_id": message['order_id'],
                     "event_at": datetime.datetime.now().isoformat()
                 })
         time.sleep(random.randint(2, 4))
-        producer.send_message({
+        publisher.send_message({
             "delivery_status": "delivering",
             "order_id": message['order_id'],
             "event_at": datetime.datetime.now().isoformat()
         })
         time.sleep(random.randint(5, 10))
-        producer.send_message({
+        publisher.send_message({
             "delivery_status": "delivered",
             "order_id": message['order_id'],
             "event_at": datetime.datetime.now().isoformat()
@@ -49,16 +49,16 @@ if __name__ == "__main__":
         ]
     )
     logger = logging.getLogger()
-    consumer = EventsManager('order-events')
-    consumer.create_consumer()
-    producer = EventsManager('delivery-events')
-    producer.create_producer()
+    subscriber = EventsManager('order-events-sub')
+    subscriber.create_subscriber()
+    publisher = EventsManager('delivery-events')
+    publisher.create_publisher()
     while True:
         try:
-            for message in consumer.consume_messages():
+            for message in subscriber.consume_messages():
                 confirmed_orders = get_confirmed_orders(message)
                 if confirmed_orders:
-                    post_delivery_messages(producer, confirmed_orders)
+                    post_delivery_messages(publisher, confirmed_orders)
                 else:
                     logger.info("No confirmed orders to process. Waiting...")
                     time.sleep(5)

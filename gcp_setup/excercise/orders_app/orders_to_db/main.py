@@ -75,7 +75,7 @@ if __name__ == "__main__":
         logging.info("No products or users available. Exiting.")
         sys.exit(1)
     producer = EventsManager('order-events')
-    producer.create_producer()
+    producer.create_publisher()
     while True:
         user = random.choice(users)
         logging.info(f"Creating new order for customer {user}\n")

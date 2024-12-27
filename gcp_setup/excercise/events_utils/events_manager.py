@@ -16,7 +16,7 @@ class EventsManager:
         self.subscriber = None
         self.subscriber_path = None
     
-    def create_producer(self):
+    def create_publisher(self):
         logging.info("Connecting to Kafka Producer")
         PROJECT_ID = os.getenv('PROJECT_ID')
         try:
