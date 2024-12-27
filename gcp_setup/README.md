@@ -69,9 +69,9 @@ gcloud config set project <PROJECT_ID>
 gcloud compute instances create <INSTANCE_NAME> --zone=<ZONE> --machine-type=<TYPE> --image=<IMAGE>
 ```
 
-For example, for a e2-micro instance in europe-southwest1-a zone:
+For example, for a e2-micro instance in europe-southwest1-a (Madrid) zone:
 ```bash
-gcloud compute instances create my-instance \
+gcloud compute instances create <INSTANCE-NAME> \
   --zone=europe-southwest1-a \
   --machine-type=e2-micro \
   --image-project=debian-cloud \
