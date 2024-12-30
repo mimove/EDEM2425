@@ -37,7 +37,7 @@ if __name__ == "__main__":
                         ]
     )
     logger = logging.getLogger()
-    delivery_message_consumer = EventsManager('delivery-events')
+    delivery_message_consumer = EventsManager(subscription_name='delivery-events-sub')
     delivery_message_consumer.create_subscriber()
     all_events = []
     OLAP_DB_CONFIG = {
@@ -54,7 +54,7 @@ if __name__ == "__main__":
         for message in delivery_message_consumer.consume_messages():
             delivery_event = get_delivery_messages(message)
             all_events.append(delivery_event[0])
-            if len(all_events) == 5:
+            if len(all_events) == 150:
                 syncronize_delivery_events(db_conn_manager, all_events)
                 all_events = []
     except Exception as e:

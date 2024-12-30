@@ -3,13 +3,14 @@
 export PATH=/usr/local/bin:/usr/bin:/bin
 export PYTHONPATH=/app
 
-echo "KAFKA_IP=$KAFKA_IP"
+echo "PROJECT_ID=$PROJECT_ID"
 echo "POSTGRES_IP=$POSTGRES_IP"
+echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS"
 
 PYTHON_BIN="/usr/local/bin/python"
 
-echo "[$(date)] Running el_delivery.main..."
-$PYTHON_BIN -m el_delivery.main
+echo "[$(date)] Running analytical_layer.el_delivery.main..."
+$PYTHON_BIN -m analytical_layer.el_delivery.main
 
-echo "[$(date)] Running el_orders.main..."
-$PYTHON_BIN -m el_orders.main
+echo "[$(date)] Running analytical_layer.el_orders.main..."
+$PYTHON_BIN -m analytical_layer.el_orders.main

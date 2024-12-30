@@ -5,9 +5,8 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 COPY requirements.txt /app/requirements.txt
-COPY analytical_layer/el_delivery /app/el_delivery
-COPY analytical_layer/el_orders /app/el_orders
-COPY analytical_layer/analytical_utils /app/analytical_utils
+COPY utils /app/utils
+COPY analytical_layer /app/analytical_layer
 COPY analytical_layer/docker/cron_run.sh /app/cron_run.sh
 COPY analytical_layer/docker/start_cron.sh /app/start_cron.sh
 

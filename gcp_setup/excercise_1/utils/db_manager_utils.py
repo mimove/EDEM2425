@@ -63,7 +63,7 @@ class DbManager:
     def write_events_to_analytical_db(self, data, table, values):
         try:
             client_olap = self._connect_clickhouse()
-            logging.info(f"Fetched {len(data)} {table} from Kafka.")
+            logging.info(f"Fetched {len(data)} {table} from PubSub.")
             query = f"INSERT INTO analytics_db.{table} VALUES {values}"
             client_olap.execute(query)
             logging.info(f"Successfully synchronized {table}  table.")
