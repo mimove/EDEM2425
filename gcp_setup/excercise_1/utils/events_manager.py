@@ -58,7 +58,7 @@ class EventsManager:
       try:
           request = pubsub_v1.types.PullRequest(
               subscription=self.subscriber_path,
-              max_messages=10
+              max_messages=150
           )
           response = self.subscriber.pull(request=request)
           for received_message in response.received_messages:
