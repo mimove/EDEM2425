@@ -2,7 +2,7 @@ import datetime
 import logging
 import time
 import random
-from events_utils.events_manager import EventsManager
+from utils.events_manager import EventsManager
 
 
 def get_confirmed_orders(message):

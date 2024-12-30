@@ -9,7 +9,7 @@ import psycopg2
 
 from orders_app.chatgpt_orders.orders_handler import get_limited_products, get_limited_users,\
                                           create_order
-from events_utils.events_manager import EventsManager
+from utils.events_manager import EventsManager
 
 
 def insert_data(order):
