@@ -339,4 +339,3 @@ To do so, we need to run the following commands:
    -v <path-to-your-pub-sub-sa>:/app/pub-sub-credentials.json \
    -e GOOGLE_APPLICATION_CREDENTIALS=/app/pub-sub-credentials.json \
    analytical-layer-cron
-   ```
