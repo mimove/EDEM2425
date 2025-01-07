@@ -209,6 +209,11 @@ Once both the orders-app and the delivery-app VMs are running, you can log in in
 
 This will start creating orders, store them in the database and publish confirmation events to the `order-events` topic.
 
+If you want to see the logs, run the following command:
+```sh
+tail -f output.log
+```
+
 
 ### For the `delivery-app` instance
 
@@ -216,6 +221,11 @@ This will start creating orders, store them in the database and publish confirma
    ```sh
    nohup bash -c 'PROJECT_ID=<your-project-id> python -m delivery_app.main' > output.log 2>&1 &
    ```
+
+If you want to see the logs, run the following command:
+```sh
+tail -f output.log
+```
 
 This will start consuming the events from the `order-events` topic and publish delivery events to the `delivery-events` topic.
 
