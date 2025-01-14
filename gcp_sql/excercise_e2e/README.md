@@ -176,19 +176,6 @@ To do this, we need a few steps
 
 Now that we have both the clickhouse and metabase running, we can deploy the EL pipeline to syncronize the PostgresDB and the Events from PubSub in two different ways.
 
-Before we proceed with the running of the EL pipeline, we need allow traffic on port 5432 in Google Cloud, so that we can connect to the PostgresDB that is deployed in the orders-app instace from our local machine.
-
-To do this, follow these steps:
-
-1. Search for `Firewall` in the GCP console.
-2. Click on `Create Firewall Rule`.
-3. Name the rule `edem-excercises`.
-4. On targets, select `All instances in the network`.
-5. On Source IP ranges, write `0.0.0.0/0`.
-6. Scroll down to the `Protocols and Ports` section. Click on TCP
-7. Allow the following port:
-   - `5432`
-8. Click on `Create`.
 
 ### Running directly the script in our machine
 
@@ -201,14 +188,14 @@ To do so, we need to run the following commands:
 
 2. Run the script to syncronize the PostgresDB database inside the ./excercise_1 directory:
    ```sh
-   HOST_IP=localhost POSTGRES_IP=<orders-app-ip>  python -m analytical_layer.el_orders.main
+   HOST_IP=localhost POSTGRES_IP=<postgres-ip>  python -m analytical_layer.el_orders.main
    ```
 
    If you are using Windows CMD, you can run:
 
    ```sh
    set HOST_IP=localhost
-   set POSTGRES_IP=<orders-app-ip>
+   set POSTGRES_IP=<postgres-ip>
    python -m analytical_layer.el_orders.main
    ```
 
@@ -216,7 +203,7 @@ To do so, we need to run the following commands:
    If you are using Windows Powershell, you can run:
 
    ```sh
-   $env:HOST_IP = "localhost"; $env:POSTGRES_IP = "<orders-app-ip>"; python -m analytical_layer.el_orders.main
+   $env:HOST_IP = "localhost"; $env:POSTGRES_IP = "<postgres-ip>"; python -m analytical_layer.el_orders.main
    ```
 
 3. To syncronize the events of the delivery app, you can run the following command:
@@ -263,7 +250,7 @@ To do so, we need to run the following commands:
    ```sh
    docker run --network analytical_layer_default \
    -e PROJECT_ID=<your-gcp-project-id> \
-   -e POSTGRES_IP=<orders-app-ip> \
+   -e POSTGRES_IP=<postgres-ip> \
    -e HOST_IP=<clickhouse-docker-container-ip> \
    -v <path-to-your-pub-sub-sa>:/app/pub-sub-credentials.json \
    -e GOOGLE_APPLICATION_CREDENTIALS=/app/pub-sub-credentials.json \
