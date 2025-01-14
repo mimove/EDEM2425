@@ -1,4 +1,4 @@
-# GCP SQL EXERCISES
+# GCP CLOUD SQL EXERCISE
 
 ## Introduction
 
