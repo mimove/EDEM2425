@@ -1,4 +1,4 @@
-# GCP SQL EXERCISES
+# GCP CLOUD SQL EXERCISE
 
 ## Introduction
 
@@ -27,7 +27,7 @@ CREATE TABLE buses (
     bus_id SERIAL PRIMARY KEY,
     route_id INT NOT NULL,
     capacity INT NOT NULL CHECK (capacity > 0),
-    status VARCHAR(20) CHECK (status IN ('Active', 'Maintenance', 'Retired')) DEFAULT 'Active',
+    status VARCHAR(100),
     FOREIGN KEY (route_id) REFERENCES routes(route_id) ON DELETE CASCADE
 );
 
