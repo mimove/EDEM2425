@@ -15,6 +15,7 @@ from utils.events_manager import EventsManager
 def insert_data(order):
     try:
         conn = psycopg2.connect(**DB_CONFIG)
+        logging.info("Connection to Database Sucessful")
         cursor = conn.cursor()
         cursor.execute(
             "INSERT INTO customers (id, customer_name, email) VALUES (%s, %s, %s) ON CONFLICT (email) DO NOTHING RETURNING id;",
