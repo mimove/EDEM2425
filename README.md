@@ -12,3 +12,8 @@ The folders are structured as follows:
 **[gcp_setup](./gcp_setup/)**
 - [README.md](./gcp_setup/README.md): Instructions to create a GCP account and create a Compute Engine instance
 - [excercise_1](./gcp_setup/excercise_1/): Excercise to deploy part of the end2end architecture in GCP
+
+**[gcp_sql](./gcp_sql/)**
+- [excercise_postgresql](./gcp_sql/excercise_postgresql/): Excercise to deploy a PostgreSQL instance in GCP, create tables and insert data using Mockaroo
+- [excercise_alloy_db](./gcp_sql/excercise_alloy_db/): Excercise to deploy an AlloyDB instance in GCP, and compare it with the performance of PostgreSQL by running some queries
+- [excercise_e2e](./gcp_sql/excercise_e2e/): Excercise to deploy an end2end architecture in GCP, using Cloud SQL, PubSub and Compute Engine instances
