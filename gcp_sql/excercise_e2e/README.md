@@ -63,6 +63,10 @@ gcloud storage buckets create gs://edem-terraform-state \
 cd EDEM2425/gcp_sql/excercise_e2e/terraform
 ```
 
+## Modify the variables for the SA in the variables.tf file
+
+Modify the `service_account_email` variable in the `variables.tf` file with the email of the service account of your project.
+
 ## Initialize the terraform directory
 
 ```sh
