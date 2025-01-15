@@ -4,6 +4,11 @@ We will work on the first components of the architecture we used in the end2end 
 
 In particular, we will focus on deploying the `orders-app` and the `delivery-app` in the Cloud, but we will use VM instances instead VMs in our local machine, and we will also use pub/sub topics instead of Kafka.
 
+
+-----------------------------
+
+# STEPS WITHOUT TERRAFORM
+
 ## Create a pub/sub topic
 
 PubSub is a messaging service that allows you to send and receive messages between independent applications. It is similar to Kafka, but it is a managed service. 
@@ -15,6 +20,73 @@ To create a PubSub topic in la UI, follow these steps:
 3. Name the topic `order-events`.
 4. Add another topic called `delivery-events`.
    
+## Create the instance for the `orders-app`
+
+```sh
+gcloud compute instances create orders-app \
+  --zone=europe-west1-b \
+  --scopes=https://www.googleapis.com/auth/cloud-platform \
+  --subnet=projects/<your-project-id>/regions/europe-west1/subnetworks/default \
+  --machine-type=e2-micro \
+  --source-machine-image=projects/<your-project-id>/global/machineImages/<MACHINE_IMAGE_NAME> \
+  --boot-disk-size=10GB
+```
+
+
+## Create the instance for the `delivery-app`
+
+```sh
+gcloud compute instances create delivery-app \
+  --zone=europe-west1-b \
+  --scopes=https://www.googleapis.com/auth/cloud-platform \
+  --subnet=projects/<your-project-id>/regions/europe-west1/subnetworks/default \
+  --machine-type=e2-micro \
+  --source-machine-image=projects/<your-project-id>/global/machineImages/<MACHINE_IMAGE_NAME> \
+  --boot-disk-size=10GB
+```
+
+-----------------------------
+
+# STEPS WITH TERRAFORM
+
+## Create a bucket to store the terraform state
+
+```sh
+gcloud storage buckets create gs://edem-terraform-state \
+  --location=europe-west1 \
+  --uniform-bucket-level-access
+```
+
+## Move to the terraform directory
+
+```sh
+cd EDEM2425/gcp_sql/excercise_e2e/terraform
+```
+
+## Modify the variables for the SA in the variables.tf file
+
+Modify the `service_account_email` variable in the `variables.tf` file with the email of the service account of your project.
+
+## Initialize the terraform directory
+
+```sh
+terraform init
+terraform plan
+```
+
+## Create the infrastructure
+
+```sh
+terraform apply
+```
+
+Once we finished the excercise, we can destroy the infrastructure by running:
+
+```sh
+terraform destroy
+```
+-----------------------------
+
 
 ## Create the required tables inside the PostgresDB instance
 
@@ -55,34 +127,8 @@ CREATE TABLE IF NOT EXISTS order_products (
 ```
 
 
-## Create the instance for the `orders-app`
-
-```sh
-gcloud compute instances create orders-app \
-  --zone=europe-west1-b \
-  --scopes=https://www.googleapis.com/auth/cloud-platform \
-  --subnet=projects/<your-project-id>/regions/europe-west1/subnetworks/default \
-  --machine-type=e2-micro \
-  --source-machine-image=projects/<your-project-id>/global/machineImages/<MACHINE_IMAGE_NAME> \
-  --boot-disk-size=10GB
-```
 
 
-## Create the instance for the `delivery-app`
-
-```sh
-gcloud compute instances create delivery-app \
-  --zone=europe-west1-b \
-  --scopes=https://www.googleapis.com/auth/cloud-platform \
-  --subnet=projects/<your-project-id>/regions/europe-west1/subnetworks/default \
-  --machine-type=e2-micro \
-  --source-machine-image=projects/<your-project-id>/global/machineImages/<MACHINE_IMAGE_NAME> \
-  --boot-disk-size=10GB
-```
-
-For example, we also need an instance for the `delivery-app` so you need to execute the command, replacing the values with the correct ones.
-
-Once both the orders-app and the delivery-app VMs are running, you can log in into the each instance and run the following commands:
 
 
 ### In both instances
@@ -105,7 +151,7 @@ Once both the orders-app and the delivery-app VMs are running, you can log in in
 
 4. Create a virtual environment:
    ```sh
-   python -m venv .venv
+   python3 -m venv .venv
    ```
 
 5. Activate the venv:
