@@ -327,6 +327,52 @@ To do so, we need to run the following commands:
    ```
 
 
+Now that we have the EL for orders_app. Let's use DBT to create a view for the delivery events.
+
+1. Create a directory with the name of the project in the dbt directory:
+   ```sh
+   mkdir dbt_project_example
+   ```
+
+2. Move to the dbt directory:
+   ```sh
+   cd dbt_project_example
+   ```
+
+3. Install dbt-bigquery:
+   ```sh
+   pip install dbt-bigquery
+   ```
+
+3. Initialize the dbt project:
+   ```sh
+   dbt init edem_project
+   ```
+
+This will create the structure of the dbt project.
+
+Now, you have a template prepare with the modifications needed to create the views for the delivery events.
+
+1. Go to the folder `dbt_template` in the `excercise_end2end` directory.
+2. Copy the dbt_project.yml content to the `dbt_project_example/edem_project/dbt_project.yml` file.
+3. Copy the content of the `models` folder to the `dbt_project_example/edem_project/models` folder.
+4. Copy the content of the `macros` folder to the `dbt_project_example/edem_project/macros` folder.
+5. Run the command to create the views:
+   ```sh
+   cd dbt_project_example
+   dbt run --select expanded_delivery_events
+   ```
+
+This will create the view for the delivery events in the `delivery` dataset in BigQuery.
+
+We have also some tables for getting aggregations by running the analytics folder.
+
+Run the following command to create the tables:
+   ```sh
+   dbt run --select analytics
+   ```
+
+
 Let's now deploy Metabase to visualize the data from BigQuery.
 
 1. Go to the excercise directory in your local machine:
