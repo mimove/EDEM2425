@@ -17,3 +17,11 @@ The folders are structured as follows:
 - [excercise_postgresql](./gcp_sql/excercise_postgresql/): Excercise to deploy a PostgreSQL instance in GCP, create tables and insert data using Mockaroo
 - [excercise_alloy_db](./gcp_sql/excercise_alloy_db/): Excercise to deploy an AlloyDB instance in GCP, and compare it with the performance of PostgreSQL by running some queries
 - [excercise_e2e](./gcp_sql/excercise_e2e/): Excercise to deploy an end2end architecture in GCP, using Cloud SQL, PubSub and Compute Engine instances
+
+**[gcp_datawarehouse](./gcp_datawarehouse/)**
+- [excercise_bigquery](./gcp_datawarehouse/excercise_bigquery/): Excercise to try the basic functionalities of BigQuery
+- [excercise_end2end](./gcp_datawarehouse/excercise_end2end/): Excercise to deploy an end2end architecture in GCP, using Cloud SQL, PubSub, Compute Engine instances and BigQuery
+
+**[gcp_datalake](./gcp_datalake/)**
+- [excercise_gcs](./gcp_datalake/excercise_gcs/): Excercise to create a bucket and check its functionality as a object storage container used as a data_lake
+- [excercise_end2end](./gcp_datalake/excercise_end2end): Excercise to deploy an end2end architecture in GCP, using Cloud SQL, PubSub, Compute Engine instances, BigQuery and GCS

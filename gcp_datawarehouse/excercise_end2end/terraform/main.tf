@@ -86,6 +86,9 @@ resource "google_sql_database_instance" "postgres_instance" {
       }
     }
   }
+  lifecycle {
+    prevent_destroy = false
+  }
 }
 
 resource "google_sql_user" "postgres_user" {
