@@ -45,6 +45,42 @@ gcloud compute instances create delivery-app \
   --boot-disk-size=10GB
 ```
 
+## Create the Cloud SQL instance
+
+To create a Cloud SQL instance, follow these steps:
+
+Run the following command to create the instance:
+
+```sh
+gcloud sql instances create edem-postgres \
+  --database-version=POSTGRES_15 \
+  --tier=db-f1-micro \
+  --region=europe-west1 \
+  --availability-type=zonal \
+  --storage-size=100 \
+  --no-deletion-protection \
+  --authorized-networks=0.0.0.0/0 \
+  --root-password=EDEM2425
+```
+
+Run the following command to create a user for the database:
+
+```sh
+gcloud sql users create postgres \
+  --instance=edem-postgres \
+  --password=EDEM2425
+```
+
+Run the following command to create the ecommerce database:
+
+
+```sh
+gcloud sql databases create ecommerce \
+  --instance=edem-postgres
+```
+
+
+
 -----------------------------
 
 # STEPS WITH TERRAFORM
@@ -88,49 +124,6 @@ terraform destroy
 -----------------------------
 
 
-## Create the required tables inside the PostgresDB instance
-
-First, create a new database in the UI of Cloud SQL. Go to database, click on `Create Database` and call it `ecommerce`.
-
-To create the tables inside the PostgresDB instance, you need to connect to the PostgresDB instance using Cloud SQL Studio, and run the following SQL commands:
-
-```sql
-CREATE TABLE IF NOT EXISTS customers (
-    id SERIAL PRIMARY KEY,
-    customer_name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS products (
-    id SERIAL PRIMARY KEY, 
-    product_name VARCHAR(255) NOT NULL,
-    price DECIMAL(10, 2) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS orders (
-    id SERIAL PRIMARY KEY, 
-    customer_id INT NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    total_price DECIMAL(10, 2) NOT NULL,
-    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS order_products (
-    order_id INT NOT NULL,
-    product_id INT NOT NULL,
-    quantity INT NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
-    PRIMARY KEY (order_id, product_id),
-    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
-);
-```
-
-
-
-
-
-
 ### In both instances
 
 1. Log in to the instance:
@@ -146,7 +139,7 @@ CREATE TABLE IF NOT EXISTS order_products (
 
 3. Move to the correct directory:
    ```sh
-   cd EDEM2425/gcp_sql/exercise_e2e
+   cd EDEM2425/gcp_datawarehouse/excercise_end2end
    ```
 
 4. Create a virtual environment:
@@ -196,15 +189,112 @@ This will start consuming the events from the `order-events` topic and publish d
 
 
 
-## **Extra excercise: Use the analytical-layer**
+# Use the analytical-layer with BigQuery as your Data Warehouse
 
-Once you have the `orders-app` and the `delivery-app` running, you can also deploy the `analytical-layer` to process the delivery events and store them in ClickHouse in your local machine as we did in the Cloud INTRO end2end excercise.
+Once you have the `orders-app` and the `delivery-app` running, we will focus in the analytical-layer.
 
-To do this, we need a few steps
+First, we will go to BigQuery to create 2 datasets (one for the orders and another for the delivery events). 
 
-1. Go to the excercise directory in your local machine:
+1. Go to the BigQuery section in the GCP console.
+2. Click on `Create Dataset` by clicking on the three dots on the right side of the name of your project.
+3. Name the dataset `orders`.
+4. Select the region `europe-west1`
+5. Click on `Create Dataset`.
+6. Click on `Create Dataset` again.
+7. Name the dataset `delivery`.
+8. Select the region `europe-west1`.
+9. Click on `Create Dataset`.
+
+Create the required tables in the `orders` dataset by running the following query in the BigQuery console:
+
+```sql
+-- Customers Table
+CREATE TABLE IF NOT EXISTS `orders.customers` (
+    id INT64,
+    customer_name STRING,
+    email STRING
+);
+
+-- Products Table
+CREATE TABLE IF NOT EXISTS `orders.products` (
+    id INT64,
+    product_name STRING,
+    price FLOAT64
+);
+
+-- Orders Table
+CREATE TABLE IF NOT EXISTS `orders.orders` (
+    id INT64,
+    customer_id INT64,
+    created_at TIMESTAMP,
+    total_price FLOAT64
+);
+
+-- Order Products Table
+CREATE TABLE IF NOT EXISTS `orders.order_products` (
+    order_id INT64,
+    product_id INT64,
+    quantity INT64,
+    price FLOAT64
+);
+```
+
+For the `delivery`dataset, we will use what is called a BigQuery subscription to sync the events from the `delivery-events` topic to the `delivery` dataset.
+
+To do this, follow these steps:
+
+1. Create a raw_table in which the events will be stored:
+ 
+```sql
+CREATE TABLE IF NOT EXISTS `delivery.raw_events_delivery` (
+    subscription_name STRING,
+    message_id STRING,
+    publish_time TIMESTAMP,
+    data JSON,
+    attributes JSON
+)
+PARTITION BY DATE(publish_time)
+CLUSTER BY subscription_name, message_id
+OPTIONS (
+    labels=[('source','bq_subs')]
+);
+```
+
+Now, we will create the subscription to the `delivery-events` topic:
+
+1. Go to the Pub/Sub section in the GCP console.
+2. Click on the `delivery-events` topic.
+3. Click on `Create Subscription`.
+4. Name the subscription `delivery-events-bq-sub`.
+5. Select in type `Write to BigQuery`.
+6. Select the `delivery` dataset.
+7. Select the `raw_events_delivery` table.
+8. Select `don't use schema`.
+9. Select `Write metadata`
+10. A message will appear that a SA doesn't have permissions. Copy the name of the SA and run the following command:
    ```sh
-   cd EDEM2425/gcp_setup/excercise_1
+   gcloud projects add-iam-policy-binding <YOUR_PROJECT_ID> \
+   --member=serviceAccount:<SA_email> \
+   --role=roles/bigquery.dataEditor
+   ```
+
+11. On the `dead-letter` section, select `Create a new topic`.
+12. Name the topic `delivery-events-dead-letter`.
+13. Create a new subscription for the dead-letter topic.
+14. Name the subscription `delivery-events-dead-letter-sub`.
+15. Click on `Create`.
+16. You might see two sections in the `Not delivered messages` with an error. Click in the `Grant` button to give permissions to publish and consume messages in the topic for the dead-lettering.
+
+
+Now we can deploy the EL pipeline to syncronize the PostgresDB database with BigQuery.
+
+
+
+To do so, we need to run the following commands:
+
+1. Create your application-default credentials. This will allow us to identify to the GCP services with our user account (in case you haven't done it yet):
+   ```sh
+   gcloud auth application-default login
    ```
 
 2. Create the venv, activate it and install the requirements:
@@ -214,34 +304,16 @@ To do this, we need a few steps
    pip install -r requirements.txt
    ```
 
-3. Deploy the docker-compose of the analytical-layer:
+3. Run the script to syncronize the PostgresDB database
    ```sh
-   cd analytical-layer
-   docker-compose up -d
-   ```
-
-Now that we have both the clickhouse and metabase running, we can deploy the EL pipeline to syncronize the PostgresDB and the Events from PubSub in two different ways.
-
-
-### Running directly the script in our machine
-
-To do so, we need to run the following commands:
-
-1. Create your application-default credentials. This will allow us to identify to the GCP services with our user account:
-   ```sh
-   gcloud auth application-default login
-   ```
-
-2. Run the script to syncronize the PostgresDB database inside the ./excercise_1 directory:
-   ```sh
-   HOST_IP=localhost POSTGRES_IP=<postgres-ip>  python -m analytical_layer.el_orders.main
+   POSTGRES_IP=<postgres-ip> GCP_PROJECT=<your-gcp-project-id> python -m analytical_layer.el_orders.main
    ```
 
    If you are using Windows CMD, you can run:
 
    ```sh
-   set HOST_IP=localhost
    set POSTGRES_IP=<postgres-ip>
+   set GCP_PROJECT=<your-gcp-project-id>
    python -m analytical_layer.el_orders.main
    ```
 
@@ -249,55 +321,23 @@ To do so, we need to run the following commands:
    If you are using Windows Powershell, you can run:
 
    ```sh
-   $env:HOST_IP = "localhost"; $env:POSTGRES_IP = "<postgres-ip>"; python -m analytical_layer.el_orders.main
+   $env:POSTGRES_IP = "<postgres-ip>";
+   $env:GCP_PROJECT = "<your-gcp-project-id>";
+   python -m analytical_layer.el_orders.main
    ```
 
-3. To syncronize the events of the delivery app, you can run the following command:
 
+Let's now deploy Metabase to visualize the data from BigQuery.
+
+1. Go to the excercise directory in your local machine:
    ```sh
-   HOST_IP=localhost PROJECT_ID=<your-gcp-project-id> python -m analytical_layer.el_delivery.main
+   cd EDEM2425/gcp_datawarehouse/excercise_end2end
    ```
 
-   If you are using Windows CMD, you can run:
+2. Deploy the docker-compose of the analytical-layer:
    ```sh
-   set HOST_IP="localhost"
-   set PROJECT_ID="<your-gcp-project-id>"
-   python -m analytical_layer.el_delivery.main
+   cd analytical-layer
+   docker-compose up -d
    ```
 
-   If you are using Windows Powershell, you can run:
-   ```sh
-   $env:HOST_IP = "localhost"; $env:PROJECT_ID = "<your-gcp-project-id>"; python -m analytical_layer.el_delivery.main
-   ```
-
-### User the Docker image with the cronjob
-
-
-1. To identify ourselves inside the Docker Container, we need to create a Service Account in GCP to allow the `analytical-layer` to consume the `delivery-events` topic.
-
-   To do this, follow these steps:
-   1. Go to the `IAM & Admin` section in the GCP console.
-   2. Click on `Service Accounts`.
-   3. Click on `Create Service Account`.
-   4. Name the service account `pub-sub-get-subscription`.
-   5. Add the role `Pub/Sub Subscriber`.
-   6. Click on `Create`.
-   7. Click on the service account you just created.
-   8. Click on `Add Key`.
-   9. Select `JSON` and click on `Create`.
-   10. Copy the path of the JSON file you just downloaded.
-
-2. Build the Docker image:
-   ```sh
-   docker build -t analytical-layer-cron -f analytical_layer/docker/DockerFile .
-   ```
-
-3. Run the following command (remember to change the variables within <> by your own values):
-   ```sh
-   docker run --network analytical_layer_default \
-   -e PROJECT_ID=<your-gcp-project-id> \
-   -e POSTGRES_IP=<postgres-ip> \
-   -e HOST_IP=<clickhouse-docker-container-ip> \
-   -v <path-to-your-pub-sub-sa>:/app/pub-sub-credentials.json \
-   -e GOOGLE_APPLICATION_CREDENTIALS=/app/pub-sub-credentials.json \
-   analytical-layer-cron
+3. Go to the browser and access to `http://localhost:3000` to access Metabase.

@@ -1,96 +1,90 @@
 import logging
 import os
-
+import time
 from utils.db_manager_utils import DbManager
+from decimal import Decimal
+from datetime import datetime
 
+def convert_types(row, schema):
+    formatted_row = {}
+    for field, value in zip(schema, row):
+        if isinstance(value, Decimal):
+            formatted_value = float(value)  # Convert Decimal to float
+        elif isinstance(value, datetime):
+            formatted_value = value.strftime('%Y-%m-%dT%H:%M:%S')  # ISO format
+        else:
+            formatted_value = value  # Keep other values unchanged
+        formatted_row[field.name] = formatted_value
+    return formatted_row
 
-def syncronize_customers(db_conn_manager, data):
-    customers_ddl = """CREATE TABLE analytics_db.customers_temp (id UInt32,
-                                                                 customer_name String,
-                                                                 email String)
-                                                                 ENGINE = MergeTree()
-                                                                 ORDER BY id"""
-    customer_values = ", ".join(
-                f"({row[0]}, '{row[1]}', '{row[2]}')" for row in data
+def get_table_schema(client, dataset_id, table_name):
+    """Fetches the schema of an existing BigQuery table."""
+    table_id = f"{client.project}.{dataset_id}.{table_name}"
+    try:
+        table = client.get_table(table_id)
+        logging.info(f"Fetched schema for {table_id}.")
+        return table.schema
+    except Exception as e:
+        logging.error(f"Failed to fetch schema for {table_id}: {e}")
+        return None
+
+def sync_table(db_conn_manager, table_name):
+    logging.info(f"Fetching data from OLTP for {table_name}.")
+    data = db_conn_manager.get_operational_data(table_name)
+    # print(data)
+    if not data:
+        logging.warning(f"No data found for {table_name}, skipping.")
+        return
+    
+    client = db_conn_manager._connect_bigquery()
+    schema = get_table_schema(client, "orders", table_name)
+    
+    if schema:
+        logging.info(f"Converting data for {table_name}.")
+        
+        try:
+            db_conn_manager.write_tables_to_analytical_db(
+                data, table_name, "orders", schema, write_disposition="WRITE_TRUNCATE"
             )
-    db_conn_manager.write_tables_to_analytical_db(data, 'customers', customers_ddl,
-                                                  customer_values)
-
-
-def syncronize_products(db_conn_manager, data):
-    products_ddl = """CREATE TABLE analytics_db.products_temp (id UInt32,
-                                                               product_name String,
-                                                               price Float32)
-                                                               ENGINE = MergeTree()
-                                                               ORDER BY id"""
-    products_value = ", ".join(
-                f"""({row[0]}, '{row[1].replace("'", "")}', {row[2]})""" for row in data
-            )
-    db_conn_manager.write_tables_to_analytical_db(data, 'products', products_ddl,
-                                                  products_value)
-
-
-def syncronize_orders(db_conn_manager, data):
-    orders_ddl = """CREATE TABLE analytics_db.orders_temp (id UInt32, customer_id UInt32,
-                                                           created_at DateTime,
-                                                           total_price Float32)
-                                                           ENGINE = MergeTree()
-                                                           ORDER BY id """
-    orders_value = ", ".join(
-                f"""({row[0]}, {row[1]}, '{row[2].strftime('%Y-%m-%d %H:%M:%S')}',
-                     {row[3]})""" for row in data
-            )
-    db_conn_manager.write_tables_to_analytical_db(data, 'orders', orders_ddl, orders_value)
-
-
-def syncronize_order_products(db_conn_manager, data):
-    order_products_ddl = """CREATE TABLE analytics_db.order_products_temp
-                            (order_id UInt32, product_id UInt32, quantity UInt32,
-                             price Float32) ENGINE = MergeTree()
-                             ORDER BY (order_id, product_id)"""
-    order_products_value = ", ".join(
-                f"""({row[0]}, {row[1]}, {row[2]}, {row[3]})""" for row in data
-            )
-    db_conn_manager.write_tables_to_analytical_db(data, 'order_products',
-                                                  order_products_ddl, order_products_value)
-
+            logging.info(f"Successfully wrote {len(data)} records to BigQuery table {table_name}.")
+        except Exception as e:
+            logging.error(f"Error during BigQuery synchronization for {table_name}: {e}")
+    else:
+        logging.error(f"Skipping {table_name} because schema could not be retrieved.")
 
 if __name__ == "__main__":
     logging.basicConfig(
-                        level=logging.INFO,
-                        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                        handlers=[
-                            logging.StreamHandler()
-                        ]
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        handlers=[logging.StreamHandler()]
     )
     logger = logging.getLogger()
     OLTP_DB_CONFIG = {
         "dbname": "ecommerce",
-        "user": "user",
-        "password": "password",
+        "user": "postgres",
+        "password": "EDEM2425",
         "host": os.getenv('POSTGRES_IP'),
         "port": 5432,
     }
     OLAP_DB_CONFIG = {
-        "host": os.getenv('HOST_IP'),
-        "port": 9001,
-        "database": "analytics_db",
-        "user": "user",
-        "password": "password",
-        "send_receive_timeout": 10
+        "project": os.getenv('GCP_PROJECT')
     }
-    logging.info("Starting syncronization.")
+    logging.info("Starting synchronization.")
     db_conn_manager = DbManager(OLTP_DB_CONFIG, OLAP_DB_CONFIG)
 
-    customers = db_conn_manager.get_operational_data('customers')
-    syncronize_customers(db_conn_manager, customers)
+    tables = ["customers", "orders", "order_products", "products"]
 
-    products = db_conn_manager.get_operational_data('products')
-    syncronize_products(db_conn_manager, products)
-
-    orders = db_conn_manager.get_operational_data('orders')
-    syncronize_orders(db_conn_manager, orders)
-
-    order_products = db_conn_manager.get_operational_data('order_products')
-    syncronize_order_products(db_conn_manager, order_products)
-    logging.info("Synchronization completed.")
+    while True:
+        try:
+            for table_name in tables:
+                sync_table(db_conn_manager, table_name)
+            
+            logging.info("Synchronization completed.")
+            logging.info("Waiting for 60 seconds...")
+            time.sleep(60)
+        except KeyboardInterrupt as _:
+            logging.warning("Synchronization interrupted by user.")
+            break
+        except Exception as e:
+            logging.error(f"Error during synchronization: {e}")
+            break

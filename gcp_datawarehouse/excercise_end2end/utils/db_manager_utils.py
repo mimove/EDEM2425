@@ -1,8 +1,10 @@
 import logging
+import decimal
+import datetime
+
 
 import psycopg2
-from clickhouse_driver import Client
-
+from google.cloud import bigquery
 
 class DbManager:
     def __init__(self, OLTP_DB_CONFIG, OLAP_DB_CONFIG):
@@ -20,21 +22,33 @@ class DbManager:
             logging.error(f"Failed to connect to PostgreSQL: {e}")
             raise
 
-    def _connect_clickhouse(self):
+    def _connect_bigquery(self):
         try:
-            self.conn_olap = Client(**self.OLAP_DB_CONFIG)
-            logging.info("Connected to ClickHouse successfully.")
-            return self.conn_olap
+            self.client_olap = bigquery.Client(**self.OLAP_DB_CONFIG)
+            logging.info("Connected to BigQuery successfully.")
+            return self.client_olap
         except Exception as e:
-            logging.error(f"Failed to connect to ClickHouse: {e}")
+            logging.error(f"Failed to connect to BigQuery: {e}")
             raise
-
+    
+    @staticmethod
+    def convert_value(value):
+        """Convert values to JSON serializable formats."""
+        if isinstance(value, decimal.Decimal):
+            return float(value)  
+        elif isinstance(value, datetime.datetime):
+            return value.isoformat()  
+        return value 
+    
     def get_operational_data(self, table):
         try:
             cursor_oltp = self._connect_postgres()
             cursor_oltp.execute(f"SELECT * FROM {table}")
             data = cursor_oltp.fetchall()
-            return data
+            # Required for JSON serialization with incompatible data types
+            processed_data = [tuple(self.convert_value(value)
+                                    for value in row) for row in data]
+            return processed_data
         except Exception as e:
             logging.error(f"Error during customer synchronization: {e}")
         finally:
@@ -42,30 +56,18 @@ class DbManager:
                 cursor_oltp.close()
                 logging.info("Closed PostgreSQL connection.")
 
-    def write_tables_to_analytical_db(self, data, table, table_ddl, values):
+    def write_tables_to_analytical_db(self, data, table, dataset_id, schema, write_disposition="WRITE_TRUNCATE"):
         try:
-            client_olap = self._connect_clickhouse()
-            logging.info(f"Fetched {len(data)} {table} from PostgreSQL.")
-            client_olap.execute(f"DROP TABLE IF EXISTS {table}_temp")
-            client_olap.execute(table_ddl)
-            logging.info(f"Created table {table}_temp in ClickHouse.")
-            query = f"INSERT INTO analytics_db.{table}_temp VALUES {values}"
-            client_olap.execute(query)
-            logging.info(f"Inserted data into {table}_temp table.")
-            client_olap.execute(f"""
-                RENAME TABLE {table} TO {table}_old, {table}_temp TO {table}
-            """)
-            client_olap.execute(f"DROP TABLE IF EXISTS {table}_old")
-            logging.info(f"Successfully synchronized {table}  table.")
+            client_olap = self._connect_bigquery()
+            table_id = f"{self.OLAP_DB_CONFIG['project']}.{dataset_id}.{table}"
+            
+            job_config = bigquery.LoadJobConfig(schema=schema, write_disposition=write_disposition)
+            
+            # Convert data to BigQuery-compatible format (list of dictionaries)
+            rows_to_insert = [dict(zip([field.name for field in schema], row)) for row in data]
+            
+            job = client_olap.load_table_from_json(rows_to_insert, table_id, job_config=job_config)
+            job.result()  # Wait for the job to complete
+            logging.info(f"Inserted {len(data)} records into {table_id}.")
         except Exception as e:
-            logging.error(f"Error during customer synchronization: {e}")
-
-    def write_events_to_analytical_db(self, data, table, values):
-        try:
-            client_olap = self._connect_clickhouse()
-            logging.info(f"Fetched {len(data)} {table} from PubSub.")
-            query = f"INSERT INTO analytics_db.{table} VALUES {values}"
-            client_olap.execute(query)
-            logging.info(f"Successfully synchronized {table}  table.")
-        except Exception as e:
-            logging.error(f"Error during customer synchronization: {e}")
+            logging.error(f"Error during BigQuery synchronization: {e}")

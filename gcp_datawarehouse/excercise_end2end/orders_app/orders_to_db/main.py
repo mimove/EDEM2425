@@ -138,4 +138,4 @@ if __name__ == "__main__":
         message = {'order_id': order_id, 'created_at': datetime.datetime.now().isoformat()}
         producer.send_message(message)
         num_orders_generated += 1
-        time.sleep(random.randint(5, 20))
+        time.sleep(random.randint(15, 40))
