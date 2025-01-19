@@ -17,7 +17,7 @@ In particular, we will check:
 
 ## Etherium dataset
 
-We will focus in the etherem dataset. This dataset contains the historical data of the Ethereum blockchain. We will make a few queries to test the capabilities of BigQuery.
+We will focus in the [ethereum dataset](https://console.cloud.google.com/marketplace/product/bigquery-public-data/blockchain-analytics-ethereum-mainnet-us). This dataset contains the historical data of the Ethereum blockchain. We will make a few queries to test the capabilities of BigQuery.
 
 
 ### Table partitioning + aggregation
