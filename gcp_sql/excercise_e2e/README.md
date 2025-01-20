@@ -1,8 +1,6 @@
 # Excercise with GCP Resources
 
-We will work on the first components of the architecture we used in the end2end of the module `Cloud Intro`
-
-In particular, we will focus on deploying the `orders-app` and the `delivery-app` in the Cloud, but we will use VM instances instead VMs in our local machine, and we will also use pub/sub topics instead of Kafka.
+We will work on the migration of our operational DB (PostgresSQL) that we used in the module `Cloud Intro` to Cloud SQL 
 
 
 -----------------------------

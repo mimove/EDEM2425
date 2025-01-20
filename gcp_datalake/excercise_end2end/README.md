@@ -1,6 +1,6 @@
 # Excercise with GCP Resources
 
-We will work on the migration of the data warehouse (Clickhouse) that we used in the module `Cloud Intro`
+We will work on creating a small example of a Data Lake in GCS 
 
 
 -----------------------------
@@ -85,10 +85,11 @@ gcloud sql databases create ecommerce \
 
 ## Create a bucket to store the terraform state
 
+
 ## Move to the terraform directory
 
 ```sh
-cd EDEM2425/gcp_datawarehouse/excercise_end2end/terraform
+cd EDEM2425/gcp_datalake/excercise_end2end/terraform
 ```
 
 ## Modify the variables for the SA in the variables.tf file
