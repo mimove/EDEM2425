@@ -5,4 +5,4 @@ order_id,
 product_id,
 quantity,
 price
-FROM {{ source('orders', 'order_products')}}
+FROM {{ source('orders_bronze', 'order_products')}}

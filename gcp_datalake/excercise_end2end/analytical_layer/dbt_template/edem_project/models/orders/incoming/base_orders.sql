@@ -5,4 +5,4 @@ id,
 customer_id,
 created_at,
 total_price
-FROM {{ source('orders', 'orders')}}
+FROM {{ source('orders_bronze', 'orders')}}

@@ -4,4 +4,4 @@ SELECT
 id,
 product_name,
 price
-FROM {{ source('orders', 'products')}}
+FROM {{ source('orders_bronze', 'products')}}

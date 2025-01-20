@@ -1,7 +1,7 @@
 version: 3
 
 sources:
-  - name: orders
+  - name: orders_bronze
     tables:
       - name: orders
       - name: products
