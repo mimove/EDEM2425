@@ -1,24 +1,12 @@
 # Excercise with GCP Resources
 
-We will work on the migration of the data warehouse (Clickhouse) that we used in the module `Cloud Intro`
+We will work on creating a small example of a Data Lake in GCS 
 
 
 -----------------------------
 
 # STEPS WITHOUT TERRAFORM
 
-## Create a pub/sub topic
-
-PubSub is a messaging service that allows you to send and receive messages between independent applications. It is similar to Kafka, but it is a managed service. 
-
-To create a PubSub topic in la UI, follow these steps:
-
-1. Go to pub/sub in the console.
-2. Click on `Create Topic`.
-3. Name the topic `order-events`.
-4. Add another topic called `delivery-events`.
-   
-## Create the instance for the `orders-app`
 
 ```sh
 gcloud compute instances create orders-app \
@@ -78,6 +66,59 @@ gcloud sql databases create ecommerce \
 ```
 
 
+Run the following command to create the BQ Datasets
+```sh
+gcloud bigquery datasets create orders_bronze --location=europe-west1 
+gcloud bigquery datasets create delivery_bronze --location=europe-west1 
+```
+
+Run the following commands to create the BQ Tables
+```sh
+gcloud bigquery tables create orders_bronze.customers \
+  --schema="id:INT64,customer_name:STRING,email:STRING"
+
+gcloud bigquery tables create orders_bronze.products \
+  --schema="id:INT64,product_name:STRING,price:FLOAT64"
+
+gcloud bigquery tables create orders_bronze.orders \
+  --schema="id:INT64,customer_id:INT64,created_at:TIMESTAMP,total_price:FLOAT64"
+
+gcloud bigquery tables create orders_bronze.order_products \
+  --schema="order_id:INT64,product_id:INT64,quantity:INT64,price:FLOAT64"
+
+gcloud bigquery tables create delivery_bronze.raw_events_delivery \
+  --schema="subscription_name:STRING,message_id:STRING,publish_time:TIMESTAMP,data:JSON,attributes:JSON" \
+  --time_partitioning_field=publish_time \
+  --clustering_fields=subscription_name,message_id \
+  --labels=source=bq_subs
+```
+
+Run the following commands to create the pub/sub topics and subscriptions
+```sh
+# Create Pub/Sub Topics
+gcloud pubsub topics create delivery-events
+gcloud pubsub topics create order-events
+gcloud pubsub topics create delivery-events-dead-letter
+
+# Create the order-events subscription
+gcloud pubsub subscriptions create order-events-sub \
+  --topic=order-events
+
+# Create Pub/Sub Subscriptions with BigQuery Sink
+gcloud pubsub subscriptions create delivery-events-bq-sub \
+  --topic=delivery-events \
+  --bigquery-table=delivery_bronze.raw_events_delivery \
+  --bigquery-use-table-schema=false \
+  --bigquery-write-metadata \
+  --dead-letter-topic=topics/delivery-events-dead-letter \
+  --max-delivery-attempts=5
+
+
+# Create Dead Letter Subscription
+gcloud pubsub subscriptions create delivery-events-dead-letter-sub \
+  --topic=delivery-events-dead-letter
+```
+
 
 -----------------------------
 
@@ -85,10 +126,11 @@ gcloud sql databases create ecommerce \
 
 ## Create a bucket to store the terraform state
 
+
 ## Move to the terraform directory
 
 ```sh
-cd EDEM2425/gcp_datawarehouse/excercise_end2end/terraform
+cd EDEM2425/gcp_datalake/excercise_end2end/terraform
 ```
 
 ## Modify the variables for the SA in the variables.tf file
@@ -154,7 +196,7 @@ terraform destroy
 
 1. Run the `orders-app` using nohup so that it runs in the background (if you close the terminal, the app will still be running):
    ```sh
-   nohup bash -c 'HOST_IP=<your-cloud-sql-ip> PROJECT_ID=<your-project-id> python -m orders_app.orders_to_db.main' > output.log 2>&1 &
+   nohup bash -c 'HOST_IP=<your-cloud-sql-ip> GCS_BUCKET_NAME=<your-bucket-name> PROJECT_ID=<your-project-id> python -m orders_app.orders_to_db.main' > output.log 2>&1 &
    ```
 
 This will start creating orders, store them in the database and publish confirmation events to the `order-events` topic.
@@ -181,102 +223,22 @@ This will start consuming the events from the `order-events` topic and publish d
 
 
 
+# Create a External Table in BigQuery to your Data Lake
+
+Now that we have the parquet file created in our bucket, we will create a external table in BigQuery to access its content.
+
+The steps you have to follow are:
+
+1. Go to the dataset `orders_bronze`
+2. Click on create table
+3. Select `Google Cloud Storage` in `Create table from`
+4. Select on Browse and choose your file from correct bucket
+5. In the table field write `raw_additional_products_info`
+6. In table type select `External Table`
+7. Select the option `Auto detect` in the Schema Section
+8. Click on `Create Table`
+
 # Use the analytical-layer with BigQuery as your Data Warehouse
-
-Once you have the `orders-app` and the `delivery-app` running, we will focus in the analytical-layer.
-
-First, we will go to BigQuery to create 2 datasets (one for the orders and another for the delivery events). 
-
-1. Go to the BigQuery section in the GCP console.
-2. Click on `Create Dataset` by clicking on the three dots on the right side of the name of your project.
-3. Name the dataset `orders`.
-4. Select the region `europe-west1`
-5. Click on `Create Dataset`.
-6. Click on `Create Dataset` again.
-7. Name the dataset `delivery`.
-8. Select the region `europe-west1`.
-9. Click on `Create Dataset`.
-
-Create the required tables in the `orders` dataset by running the following query in the BigQuery console:
-
-```sql
--- Customers Table
-CREATE TABLE IF NOT EXISTS `orders.customers` (
-    id INT64,
-    customer_name STRING,
-    email STRING
-);
-
--- Products Table
-CREATE TABLE IF NOT EXISTS `orders.products` (
-    id INT64,
-    product_name STRING,
-    price FLOAT64
-);
-
--- Orders Table
-CREATE TABLE IF NOT EXISTS `orders.orders` (
-    id INT64,
-    customer_id INT64,
-    created_at TIMESTAMP,
-    total_price FLOAT64
-);
-
--- Order Products Table
-CREATE TABLE IF NOT EXISTS `orders.order_products` (
-    order_id INT64,
-    product_id INT64,
-    quantity INT64,
-    price FLOAT64
-);
-```
-
-For the `delivery`dataset, we will use what is called a BigQuery subscription to sync the events from the `delivery-events` topic to the `delivery` dataset.
-
-To do this, follow these steps:
-
-1. Create a raw_table in which the events will be stored:
- 
-```sql
-CREATE TABLE IF NOT EXISTS `delivery.raw_events_delivery` (
-    subscription_name STRING,
-    message_id STRING,
-    publish_time TIMESTAMP,
-    data JSON,
-    attributes JSON
-)
-PARTITION BY DATE(publish_time)
-CLUSTER BY subscription_name, message_id
-OPTIONS (
-    labels=[('source','bq_subs')]
-);
-```
-
-Now, we will create the subscription to the `delivery-events` topic:
-
-1. Go to the Pub/Sub section in the GCP console.
-2. Click on the `delivery-events` topic.
-3. Click on `Create Subscription`.
-4. Name the subscription `delivery-events-bq-sub`.
-5. Select in type `Write to BigQuery`.
-6. Select the `delivery` dataset.
-7. Select the `raw_events_delivery` table.
-8. Select `don't use schema`.
-9. Select `Write metadata`
-10. A message will appear that a SA doesn't have permissions. Copy the name of the SA and run the following command:
-   ```sh
-   gcloud projects add-iam-policy-binding <YOUR_PROJECT_ID> \
-   --member=serviceAccount:<SA_email> \
-   --role=roles/bigquery.dataEditor
-   ```
-
-11. On the `dead-letter` section, select `Create a new topic`.
-12. Name the topic `delivery-events-dead-letter`.
-13. Create a new subscription for the dead-letter topic.
-14. Name the subscription `delivery-events-dead-letter-sub`.
-15. Click on `Create`.
-16. You might see two sections in the `Not delivered messages` with an error. Click in the `Grant` button to give permissions to publish and consume messages in the topic for the dead-lettering.
-
 
 Now we can deploy the EL pipeline to syncronize the PostgresDB database with BigQuery.
 
