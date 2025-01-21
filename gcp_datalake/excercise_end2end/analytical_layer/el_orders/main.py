@@ -37,14 +37,14 @@ def sync_table(db_conn_manager, table_name):
         return
     
     client = db_conn_manager._connect_bigquery()
-    schema = get_table_schema(client, "orders", table_name)
+    schema = get_table_schema(client, "orders_bronze", table_name)
     
     if schema:
         logging.info(f"Converting data for {table_name}.")
         
         try:
             db_conn_manager.write_tables_to_analytical_db(
-                data, table_name, "orders", schema, write_disposition="WRITE_TRUNCATE"
+                data, table_name, "orders_bronze", schema, write_disposition="WRITE_TRUNCATE"
             )
             logging.info(f"Successfully wrote {len(data)} records to BigQuery table {table_name}.")
         except Exception as e:
