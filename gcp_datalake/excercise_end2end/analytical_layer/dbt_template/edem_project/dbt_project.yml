@@ -36,10 +36,10 @@ models:
       - "{{ ensure_dataset_exists(target.dataset) }}"
     delivery:
       mart:
-        +dataset: delivery_mart
+        +dataset: delivery_gold
     orders:
       mart:
-        +dataset: order_mart
+        +dataset: order_gold
     analytics:
       +dataset: analytics
 
