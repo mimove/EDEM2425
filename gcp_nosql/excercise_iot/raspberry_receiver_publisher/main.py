@@ -1,6 +1,7 @@
 import serial
 import json
 import os
+import datetime
 from google.cloud import pubsub_v1
 
 # Google Cloud Configuration
@@ -27,7 +28,10 @@ try:
             if line:
                 try:
                     data = json.loads(line)  # Parse JSON from Serial
-                    print(json.dumps(data, indent=2))  # Pretty-print JSON
+
+                    data["sent_at"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
+
+                    print(json.dumps(data, indent=2)) 
 
                     # Encode and publish message to Pub/Sub
                     message = json.dumps(data).encode("utf-8")

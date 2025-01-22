@@ -50,6 +50,7 @@ def callback(message):
         event_data = json.loads(message.data.decode("utf-8"))
         temperature = event_data.get("temperature")
         led = event_data.get("led")
+        sent_at = event_data.get("sent_at", time.strftime("%Y-%m-%dT%H:%M:%S"))
 
         print(f"Received message: {event_data}")
 
@@ -60,13 +61,14 @@ def callback(message):
         # Write to 'measures' column family
         row.set_cell("measures", "temperature", str(temperature).encode("utf-8"))
         row.set_cell("measures", "led", str(led).encode("utf-8"))
+        row.set_cell("measures", "sent_at", sent_at.encode("utf-8"))  # Store sent_at timestamp
 
         # Write to 'identification' column family
         row.set_cell("identification", "sensor_id", b"pico-sensor")
 
         # Commit row
         row.commit()
-        print(f"Inserted row {row_key.decode('utf-8')} into Bigtable")
+        print(f"Inserted row {row_key.decode('utf-8')} into Bigtable with sent_at: {sent_at}")
 
         # Acknowledge the message
         message.ack()
