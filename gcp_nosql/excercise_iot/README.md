@@ -26,6 +26,26 @@ You only have to focus on the `big_table_publisher` folder. The other folders ar
 
 Run the following command to install the dependencies:
 
+Create a virtual environment:
+
+```bash
+python -m venv .venv
+```
+
+Activate the virtual environment:
+
+```bash
+source .venv/bin/activate
+```
+
+If your are using Windows, you can activate the virtual environment with the following command:
+
+```bash
+.venv\Scripts\activate
+```
+
+Install the requirements:
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -37,4 +57,20 @@ Run the following command to start the script:
 ```bash
 GOOGLE_APPLICATION_CREDENTIALS_PUBSUB=<path_to_the_credentials_of_pubsub> GOOGLE_APPLICATION_CREDENTIALS_BIGTABLE=<path_to_your_big_table_credentials> python main.py
 ```
+
+If you are running from powershell, you can use the following command:
+
+```bash
+$env:GOOGLE_APPLICATION_CREDENTIALS_PUBSUB="<path_to_the_credentials_of_pubsub>"; $env:GOOGLE_APPLICATION_CREDENTIALS_BIGTABLE="<path_to_your_big_table_credentials>";
+python main.py
+```
+
+If you are running from cmd, you can use the following command:
+
+```bash
+set GOOGLE_APPLICATION_CREDENTIALS_PUBSUB=<path_to_the_credentials_of_pubsub>
+set GOOGLE_APPLICATION_CREDENTIALS_BIGTABLE=<path_to_your_big_table_credentials>
+python main.py
+```
+
 
