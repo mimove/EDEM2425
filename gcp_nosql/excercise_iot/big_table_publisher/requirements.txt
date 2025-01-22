@@ -1,0 +1,2 @@
+google-cloud-pubsub==2.27.1
+google-cloud-bigtable==2.28.1
