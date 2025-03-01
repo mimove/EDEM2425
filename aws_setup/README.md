@@ -102,6 +102,61 @@ http://<IP>:8600
 To install the AWS CLI, you can follow the instructions provided in the [official documentation](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html).
 
 
+## Create a user for CLI access
+
+1. Go to the IAM service in the AWS Management Console.
+
+2. Click on "Users" and then on "Add user".
+
+3. Write the username (e.g., `cli-user`) 
+
+4. Give it full administrator access.
+
+5. Click on "Next" and then on "Create user".
+
+6. Create a new key pair and download it.
+
+7. Run the following command to configure the AWS CLI:
+
+```bash
+aws configure
+```
+
+8. Enter the access key and secret key
+
+9. Enter eu-noth-1 as the default region
+
+10. Enter json as the default output format
+
+11. Run the following command to check if the configuration is correct:
 
 
+
+## Create an EC2 instance using the CLI
+
+1. Go to the EC2 service in the AWS Management Console.
+
+2. Click on `Launch Instance` and select the same options as before.
+
+3. Click on `Preview code` and copy the command.
+
+4. Run the command in the terminal.
+
+5. A JSON will appear in the terminal with the information of the instance.
+
+6. Run the following command to get the public IP of the instance:
+
+```bash
+PUBLIC_IP=$(aws ec2 describe-instances \
+    --filters "Name=tag:Name,Values=app-server" \
+    --query "Reservations[*].Instances[*].PublicIpAddress" \
+    --output text)
+echo "Public IP: $PUBLIC_IP"
+```
+
+7. Run the following command to login to the instance:
+
+```bash
+ssh -i ec2-2keys.pem ubuntu@$PUBLIC_IP
+```
 
