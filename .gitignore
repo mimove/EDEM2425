@@ -169,8 +169,8 @@ cython_debug/
 
 **/plugins/**
 
-**/.vscode/** 
-
+**.vscode/** 
+**ruff**
 
 # Terraform
 
@@ -178,3 +178,5 @@ terraform.tfstate
 terraform.tfstate.backup
 .terraform/
 .terraform.**
+
+**mimove**
