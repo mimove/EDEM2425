@@ -160,3 +160,4 @@ echo "Public IP: $PUBLIC_IP"
 ssh -i ec2-2keys.pem ubuntu@$PUBLIC_IP
 ```
 
+
