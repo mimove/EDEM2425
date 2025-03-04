@@ -180,3 +180,4 @@ terraform.tfstate.backup
 .terraform.**
 
 **mimove**
+**.env**
