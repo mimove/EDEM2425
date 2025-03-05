@@ -1,0 +1,23 @@
+[
+    {
+        "hangarId": "H-01",
+        "name": "Hangar Principal",
+        "capacity": 5,
+        "location": "Zona Norte",
+        "supervisor": "Miguel Sánchez"
+    },
+    {
+        "hangarId": "H-02",
+        "name": "Hangar Secundario",
+        "capacity": 3,
+        "location": "Zona Sur",
+        "supervisor": "Laura Gómez"
+    },
+    {
+        "hangarId": "H-03",
+        "name": "Hangar de Mantenimiento",
+        "capacity": 2,
+        "location": "Zona Técnica",
+        "supervisor": "Carlos Ruiz"
+    }
+]
