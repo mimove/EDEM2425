@@ -1,0 +1,24 @@
+[
+    {
+        "plateNumber": "EC-NEW1",
+        "type": "Beechcraft King Air 350",
+        "lastMaintenanceDate": "2025-01-10",
+        "nextMaintenanceDate": "2026-01-10",
+        "capacity": 9,
+        "ownerId": "O-78901",
+        "ownerName": "Atlantic Wings",
+        "hangarId": "H-02",
+        "fuel_capacity": 1200
+    },
+    {
+        "plateNumber": "EC-NEW2",
+        "type": "Cirrus SR22",
+        "lastMaintenanceDate": "2024-12-05",
+        "nextMaintenanceDate": "2025-12-05",
+        "capacity": 4,
+        "ownerId": "O-56789",
+        "ownerName": "Skyline Aviation",
+        "hangarId": "H-03",
+        "fuel_capacity": 300
+    }
+]
