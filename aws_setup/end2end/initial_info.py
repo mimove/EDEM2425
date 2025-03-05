@@ -1,3 +1,6 @@
+from datetime import datetime
+import json 
+
 # Info examples form Jacinto's father notebooks
 
 airplanes = [
@@ -174,3 +177,72 @@ passengers = [
                     "dateOfBirth": "1989-02-10",
                 }
             ]
+
+# Obtener el momento actual
+current_time = datetime.now()
+
+# ---------------------------------------------------------------------------
+# 1. Mostrar la lista de vuelos que han aterrizado
+landed_flights = []
+for flight in flights:
+    arrival = datetime.fromisoformat(flight["arrivalTime"])
+    if arrival <= current_time:
+        landed_flights.append(flight)
+
+print("Vuelos que han aterrizado:")
+print(json.dumps(landed_flights, indent=4, ensure_ascii=False))
+
+
+# ---------------------------------------------------------------------------
+# 2. Avisar de vuelos con pasajeros cancelados
+for flight in flights:
+    cancelled_passengers = [pid for pid, status in flight["passengerIds"] if status.lower() == "cancelled"]
+    if cancelled_passengers:
+        print(f"Aviso: El vuelo {flight['flightId']} tiene pasajeros que han cancelado: {cancelled_passengers}")
+
+
+# ---------------------------------------------------------------------------
+# 3. Mostrar aviones en el hangar y su estado, según los vuelos asignados
+
+print("\nEstado de aviones:")
+for airplane in airplanes:
+    # Buscar vuelos asociados a este avión
+    associated_flights = [flight for flight in flights if flight["plateNumber"] == airplane["plateNumber"]]
+    # Estado por defecto si no tiene vuelos asignados
+    status = "En hangar"
+    if associated_flights:
+        # Variables para determinar el estado
+        in_flight = False
+        pending = False
+        landed = False
+        for flight in associated_flights:
+            departure = datetime.fromisoformat(flight["departureTime"])
+            arrival = datetime.fromisoformat(flight["arrivalTime"])
+            if departure <= current_time < arrival:
+                in_flight = True
+                break  # Si está en vuelo, ese es el estado prioritario
+            elif current_time < departure:
+                pending = True
+            elif current_time >= arrival:
+                landed = True
+        if in_flight:
+            status = "En vuelo"
+        elif pending:
+            status = "Pendiente de vuelo"
+        elif landed:
+            status = "Aterrizado y en hangar"
+    print(f"Avión {airplane['plateNumber']} ({airplane['type']}) - Estado: {status}")
+
+
+# ---------------------------------------------------------------------------
+# 4. Mostrar el estado de los pasajeros (ID y nombre) para cada vuelo
+
+print("\nEstado de pasajeros en cada vuelo:")
+# Crear un diccionario para relacionar passengerId con su nombre
+passenger_map = {p["passengerId"]: p["name"] for p in passengers}
+
+for flight in flights:
+    print(f"\nPara el vuelo {flight['flightId']}:")
+    for pid, pstatus in flight["passengerIds"]:
+         pname = passenger_map.get(pid, "Nombre no encontrado")
+         print(f"    Pasajero {pid} - {pname}: {pstatus}")
