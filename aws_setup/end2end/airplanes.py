@@ -41,9 +41,9 @@ def check_date():
 
         if days_left < 100:
             print(f"ALERT: Airplane {airplane['plateNumber']} needs maintenance soon ({days_left} days left)! You should plan for the maintenance asap!")
-        
 
-if __name__ == "__main__":
+
+def choose_options():
     while True:
         print("\n1. List Airplanes")
         print("2. Register Airplane")
@@ -67,3 +67,7 @@ if __name__ == "__main__":
         if continue_actions == "no":
             print("Exiting program.")
             break
+
+
+if __name__ == "__main__":
+    choose_options()
