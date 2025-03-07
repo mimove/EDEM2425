@@ -28,8 +28,8 @@ flights = [
                 {
                     "flightId": "FL-2025-001",
                     "plateNumber": "EC-XYZ1",
-                    "arrivalTime": "2025-03-01T09:30:00",
-                    "departureTime": "2025-03-01T14:45:00",
+                    "departureTime": "2025-03-01T09:30:00",
+                    "arrivalTime": "2025-03-01T14:45:00",
                     "fuelConsumption": 350,
                     "occupiedSeats": 7,
                     "origin": "Valencia",
@@ -39,8 +39,8 @@ flights = [
                 {
                     "flightId": "FL-2025-002",
                     "plateNumber": "EC-ABC2",
-                    "arrivalTime": "2025-03-02T11:15:00",
-                    "departureTime": "2025-03-02T16:30:00",
+                    "departureTime": "2025-03-02T11:15:00",
+                    "arrivalTime": "2025-03-02T16:30:00",
                     "fuelConsumption": 850,
                     "occupiedSeats": 8,
                     "origin": "Barcelona",

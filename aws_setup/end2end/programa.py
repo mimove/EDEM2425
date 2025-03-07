@@ -34,29 +34,27 @@ AIRPLANES JACINTO
     for airplane in airplanes:
         print(f"Airplane numero {airplanes.index(airplane) +1}")
         print(f"Plate Number: {airplane['plateNumber']}")
+        print()
 
 
 def detail_flights(flights):
     print("Airplanes Jacinto, vuela seguro")
-    time_now = datetime.now().replace(microsecond=0)  
-    for flight in flights:
+    print()
+    time_now = datetime.now().replace(microsecond=0) 
+    for flight in flights: 
         departure_time = datetime.strptime(flight['departureTime'], "%Y-%m-%dT%H:%M:%S")
         arrival_time = datetime.strptime(flight['arrivalTime'], "%Y-%m-%dT%H:%M:%S")
-        if departure_time <= time_now:
-            print('''
---------------------------------
-Vuelos han llegado llegar
---------------------------------
-                  ''')
-        else:
-            print('''
---------------------------------
-Vuelos por llegar
---------------------------------
-                  ''')
+
+        if arrival_time <= time_now and departure_time <= time_now:
+            print('Vuelos que ya han aterrizado')
+            print()
+        elif arrival_time <= time_now and departure_time >= time_now:
+            print('vuelos que estan por llegar')
+            print()
+        elif arrival_time >= time_now:
+            print('Vuelos que aun no han salido')
+            print()
         _print_message(flight)
-
-
 
 if __name__ == '__main__':
 
