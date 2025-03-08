@@ -1,14 +1,13 @@
 from initial_info import airplanes, passengers, flights 
-import datetime
 import logging
 import os
 
 import psycopg2
-from dotenv import load_dotenv
+from dotenv import load_dotenv # Importa las variables del archivo .env lo que se escribe como dotenv
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO) # Ajustes predeterminados para el logging
 
-load_dotenv()
+load_dotenv() # Carga las variables de entorno desde el archivo.env
 
 RDS_HOST = os.environ['RDS_HOST']
 RDS_PORT = os.environ['RDS_PORT']
@@ -16,130 +15,130 @@ RDS_USER = os.environ['RDS_USER']
 RDS_PASSWORD = os.environ['RDS_PASSWORD']
 RDS_DB = os.environ['RDS_DB']
 
-
 def connect_to_postgres_rds() -> psycopg2.connect:
-    conn = psycopg2.connect(
-        host=RDS_HOST,
-        port=RDS_PORT,
-        user=RDS_USER,
-        password=RDS_PASSWORD,
+    conn= psycopg2.connect(
+        host= RDS_HOST,
+        port= RDS_PORT, 
+        user= RDS_USER,
+        password= RDS_PASSWORD,
         database=RDS_DB
     )
     return conn
 
-
 def create_tables(conn):
     """
-    Crea las tablas necesarias:
-    - airplanes
-    - passengers
-    - flights
-    - flight_passengers (relación entre flights y passengers)
+    Se crean las tablas necesarias para la gestión de:
+      - aviones
+      - pasajeros
+      - vuelos
+      - relación entre pasajeros y vuelos
+      
+    Se configura ON DELETE CASCADE en las claves foráneas para que,
+    al eliminar un registro padre, se eliminen automáticamente los registros hijos.
     """
     with conn.cursor() as cur:
-        # Tabla de aviones
-        cur.execute("""
+        # Crear la tabla de aviones
+        cur.execute('''
             CREATE TABLE IF NOT EXISTS airplanes (
-                plateNumber VARCHAR PRIMARY KEY,
-                type VARCHAR NOT NULL,
+                plateNumber VARCHAR PRIMARY KEY, 
+                type VARCHAR NOT NULL, 
                 lastMaintenanceDate DATE,
                 nextMaintenanceDate DATE,
                 capacity INT,
                 ownerId VARCHAR,
                 ownerName VARCHAR,
                 hangarId VARCHAR,
-                fuel_capacity INT
+                fuel_capacity FLOAT
             );
-        """)
+        ''')
 
-        # Tabla de pasajeros
-        cur.execute("""
+        # Crear la tabla de pasajeros
+        cur.execute('''
             CREATE TABLE IF NOT EXISTS passengers (
                 passengerId VARCHAR PRIMARY KEY,
                 name VARCHAR NOT NULL,
                 nationalId VARCHAR NOT NULL,
                 dateOfBirth DATE
             );
-        """)
+        ''')
 
-        # Tabla de vuelos
-        cur.execute("""
+        # Crear la tabla de vuelos referenciando aviones con borrado en cascada
+        cur.execute('''
             CREATE TABLE IF NOT EXISTS flights (
                 flightId VARCHAR PRIMARY KEY,
-                plateNumber VARCHAR REFERENCES airplanes(plateNumber),
-                arrivalTime TIMESTAMP,
-                departureTime TIMESTAMP,
-                fuelConsumption INT,
+                plateNumber VARCHAR,
+                departureTime DATE,
+                arrivalTime DATE,
+                fuelConsumption FLOAT,
                 occupiedSeats INT,
                 origin VARCHAR,
-                destination VARCHAR
+                destination VARCHAR,
+                CONSTRAINT fk_airplanes FOREIGN KEY (plateNumber)
+                    REFERENCES airplanes (plateNumber)
+                    ON DELETE CASCADE
             );
-        """)
+        ''')
 
-        # Tabla intermedia para la relación vuelo - pasajero
-        cur.execute("""
+        # Crear la tabla de relación flight_passengers con claves foráneas y borrado en cascada.
+        # Así, si se elimina un vuelo o un pasajero, se eliminan las relaciones correspondientes.
+        cur.execute('''
             CREATE TABLE IF NOT EXISTS flight_passengers (
-                flightId VARCHAR REFERENCES flights(flightId),
-                passengerId VARCHAR REFERENCES passengers(passengerId),
+                flightId VARCHAR,
+                passengerId VARCHAR,
                 status VARCHAR,
-                PRIMARY KEY (flightId, passengerId)
+                PRIMARY KEY (flightId, passengerId),
+                CONSTRAINT fk_flights FOREIGN KEY (flightId)
+                    REFERENCES flights (flightId)
+                    ON DELETE CASCADE,
+                CONSTRAINT fk_passengers FOREIGN KEY (passengerId)
+                    REFERENCES passengers (passengerId)
+                    ON DELETE CASCADE
             );
-        """)
+        ''')
 
-        conn.commit()
+    conn.commit()
 
 
 def insert_airplanes(conn, airplane_list):
-    with conn.cursor() as cur:
+    with conn.cursor() as cur: 
         for airplane in airplane_list:
-            cur.execute("""
-                INSERT INTO airplanes (
-                    plateNumber,
-                    type,
-                    lastMaintenanceDate,
-                    nextMaintenanceDate,
-                    capacity,
-                    ownerId,
-                    ownerName,
-                    hangarId,
-                    fuel_capacity
-                )
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            cur.execute('''
+                INSERT INTO airplanes 
+                    (plateNumber, type, lastMaintenanceDate nextMaintenanceDate, capacity, ownerId, ownerName, hangarId, fuel_capacity)
+
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) 
                 ON CONFLICT (plateNumber) DO NOTHING
-            """, (
-                airplane["plateNumber"],
-                airplane["type"],
-                airplane["lastMaintenanceDate"],
-                airplane["nextMaintenanceDate"],
-                airplane["capacity"],
-                airplane["ownerId"],
-                airplane["ownerName"],
-                airplane["hangarId"],
-                airplane["fuel_capacity"]
-            ))
+                ''',
+                (
+                    airplane["plateNumber"],
+                    airplane["type"],
+                    airplane["lastMaintenanceDate"],
+                    airplane["nextMaintenanceDate"],
+                    airplane["capacity"],
+                    airplane["ownerId"],
+                    airplane["ownerName"],
+                    airplane["hangarId"],
+                    airplane["fuel_capacity"]))
         conn.commit()
 
-
-def insert_passengers(conn, passenger_list):
+def insert_passengers(conn, passengers_list):
     with conn.cursor() as cur:
-        for p in passenger_list:
-            cur.execute("""
-                INSERT INTO passengers (
-                    passengerId,
-                    name,
-                    nationalId,
-                    dateOfBirth
-                )
-                VALUES (%s, %s, %s, %s)
-                ON CONFLICT (passengerId) DO NOTHING
-            """, (
-                p["passengerId"],
-                p["name"],
-                p["nationalId"],
-                p["dateOfBirth"]
-            ))
-        conn.commit()
-
+            for p in passengers_list:
+                cur.execute('''
+                    Insert into passengers
+                            (passengerId,
+                            name,
+                            nationalId,
+                            dateOfBirth)
+                            Values (%s, %s,%s,%s )
+                            ON CONFLICT (passengerId) DO NOTHING
+                            ''', (
+                                p["passengerId"],
+                                p["name"],
+                                p["nationalId"],
+                                p["dateOfBirth"]
+                            ))
+                conn.commit()
 
 def insert_flights(conn, flight_list):
     with conn.cursor() as cur:
