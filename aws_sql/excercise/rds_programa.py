@@ -104,7 +104,7 @@ def insert_airplanes(conn, airplane_list):
         for airplane in airplane_list:
             cur.execute('''
                 INSERT INTO airplanes 
-                    (plateNumber, type, lastMaintenanceDate nextMaintenanceDate, capacity, ownerId, ownerName, hangarId, fuel_capacity)
+                    (plateNumber, type, lastMaintenanceDate, nextMaintenanceDate, capacity, ownerId, ownerName, hangarId, fuel_capacity)
 
                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s) 
                 ON CONFLICT (plateNumber) DO NOTHING
