@@ -339,7 +339,30 @@ def page_ver_passengers(conn):
     except Exception as e:
         st.error(f'error al obtener los datos {e}')
 
-    
+def get_maintenance(conn):
+    '''Con esta parte pretendemos que nos muestre todos los aviones en el hangar y que nos diga el tiempo que le queda para que se realicen las maintenance''
+    '''
+    query = '''
+    Select plateNumber, lastMaintenanceDate, nextMaintenanceDate, nextMaintenanceDate - NOW() as days_to_maintenance from airplanes
+'''
+    with conn.cursor() as cur:
+        cur.execute(query)
+        rows = cur.fetchall()
+        columns = [desc[0] for desc in cur.description]
+    return pd.DataFrame(rows, columns=columns)
+
+def page_ver_maintenance(conn):
+    '''Esto sirve para poder ver el tiempo que queda en streamlit'''
+    st.subheader('Ver mantenimiento de aviones')
+    try:
+        df_maintenance = get_maintenance(conn)
+        if not df_maintenance.empty:
+            st.dataframe(df_maintenance)
+        else:
+            st.info('No se han encontrado aviones en mantenimiento')
+    except Exception as e:
+        st.error(f'Error al obtener los datos: {e}')
+
 def main():
     st.title("Gestión de Aviones y Aeropuerto")
     
