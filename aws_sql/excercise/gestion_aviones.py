@@ -27,10 +27,6 @@ def connect_to_postgres_rds():
     )
     return conn
 
-# =========================
-# ====   CONSULTAS    =====
-# =========================
-
 def get_landed_airplanes(conn):
     """
     Devuelve los aviones que han aterrizado (arrivalTime <= NOW()).
@@ -80,9 +76,7 @@ def get_upcoming_airplanes(conn):
         columns = [desc[0] for desc in cur.description]
     return pd.DataFrame(rows, columns=columns)
 
-# =========================
-# ====   INSERCIONES  =====
-# =========================
+
 
 def insert_airplane(conn, airplane):
     """
@@ -172,10 +166,6 @@ def register_passenger_in_flight(conn, flight_id, passenger_id, status):
         cur.execute(query, (flight_id, passenger_id, status))
     conn.commit()
 
-# =====================================
-# ====   PÁGINAS / SECCIONES UI   =====
-# =====================================
-
 def page_ver_aviones(conn):
     st.subheader("Ver aviones según estado")
 
@@ -214,7 +204,7 @@ def page_ver_aviones(conn):
             except Exception as e:
                 st.error(f"Error al obtener los datos: {e}")
 
-def page_add_airplane(conn):
+def page_add_airplane(conn):    
     st.subheader("Añadir un nuevo avión")
     with st.form("form_add_airplane"):
         plate_number = st.text_input("Número de matrícula")
@@ -326,9 +316,30 @@ def page_register_passenger_flight(conn):
                 except Exception as e:
                     st.error(f"Error al registrar pasajero en vuelo: {e}")
 
-# =========================
-# ========== MAIN =========
-# =========================
+def get_passengers(conn):
+    '''Esta función lo que permite es ver a todos aquellos pasageros que han pasado por el aeropuerto'''
+    query= '''
+    SELECT * FROM passengers
+    '''
+    with conn.cursor() as cur: 
+        cur.execute(query)
+        rows= cur.fetchall()
+        columns = [desc[0] for desc in cur.description]
+    return pd.DataFrame(rows, columns=columns)
+
+def page_ver_passengers(conn): 
+    '''Esto lo que nos permitiráa es ver en una página nueva toda la información sobre los pasajeros'''
+    st.subheader('Ver Pasajeros ')
+    try:
+        df_passengers= get_passengers(conn)
+        if not df_passengers.empty:
+            st.dataframe(df_passengers)
+        else:
+            st.info('no se han encontrado pasageros')
+    except Exception as e:
+        st.error(f'error al obtener los datos {e}')
+
+    
 def main():
     st.title("Gestión de Aviones y Aeropuerto")
     
@@ -363,6 +374,8 @@ def main():
         page_add_flight(conn)
     elif page == "Registrar/Actualizar Pasajero en Vuelo":
         page_register_passenger_flight(conn)
+    elif page == 'Ver Pasajeros':
+        page_ver_passengers(conn)
 
     # Cerramos la conexión al final
     conn.close()
