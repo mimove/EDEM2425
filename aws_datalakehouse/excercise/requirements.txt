@@ -1,0 +1,4 @@
+pyarrow
+pyiceberg[glue]
+s3fs
+pandas

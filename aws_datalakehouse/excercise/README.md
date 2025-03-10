@@ -13,7 +13,7 @@ In this module we will learn how to insert sample data into the data lakehouse. 
 Run the following query
 
 ```sql
-INSERT INTO "example-1"."table-example"
+INSERT INTO "db1"."table1"
 VALUES (1, 'jacinto', timestamp '2023-01-01 12:00:00');
 ```
 
@@ -30,7 +30,7 @@ Download all the files from data and metadata.
 Run the following query
 
 ```sql
-MERGE INTO "example-1"."table-example" AS t
+MERGE INTO "db1"."table1" AS t
 USING ( 
     SELECT 1 AS id, 'jacinto' AS name, timestamp '2023-01-01 13:00:00' AS created_at
     UNION ALL
@@ -51,6 +51,6 @@ Download the new files from data and metadata.
 Run the following query
 
 ```sql
-SELECT * FROM "example-1"."table-example" 
+SELECT * FROM "db1"."table1" 
 FOR TIMESTAMP AS OF TIMESTAMP <timestamp for example '2023-01-01 12:00:00.000 UTC'>;
 ```
