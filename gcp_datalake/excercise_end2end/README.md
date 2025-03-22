@@ -173,7 +173,7 @@ terraform destroy
 
 3. Move to the correct directory:
    ```sh
-   cd EDEM2425/gcp_datawarehouse/excercise_end2end
+   cd EDEM2425/gcp_datalake/excercise_end2end
    ```
 
 4. Create a virtual environment:
@@ -331,7 +331,7 @@ Let's now deploy Metabase to visualize the data from BigQuery.
 
 1. Go to the excercise directory in your local machine:
    ```sh
-   cd EDEM2425/gcp_datawarehouse/excercise_end2end
+   cd EDEM2425/gcp_datalake/excercise_end2end
    ```
 
 2. Deploy the docker-compose of the analytical-layer:
