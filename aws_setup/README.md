@@ -148,7 +148,7 @@ aws configure
 
 ```bash
 PUBLIC_IP=$(aws ec2 describe-instances \
-    --filters "Name=tag:Name,Values=app-server" \
+    --filters "Name=tag:Name,Values=<your-instance-name>" \
     --query "Reservations[*].Instances[*].PublicIpAddress" \
     --output text)
 echo "Public IP: $PUBLIC_IP"
