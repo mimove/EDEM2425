@@ -33,4 +33,4 @@ The product has to be deployed in AWS, as Jacinto wants to be able to access it 
 
 From the MVP, the sky is the limit. You can Dockerize it, create an API, a UI to interact with the prouduct. You could even try to deploy it using microk8s in a virtual machine.
 
-Initial user stories have been created for you. You can find them in the [following link](https://mimove14.atlassian.net/jira/software/projects/SCRUM/boards/1/backlog?atlOrigin=eyJpIjoiNDZmNDQ0MDk1OTg5NDI2MjlhNWEyYTIxNzU0NzAyZjAiLCJwIjoiaiJ9), after creating a Jira Account
+Initial user stories have been created for you. You can find them in the [following link](https://trello.com/invite/b/6829f2faf4b11236386a42dc/ATTIb892baeadcfa70247901fbb24b5d9349063D636B/basic-board), after creating a Trello Account
